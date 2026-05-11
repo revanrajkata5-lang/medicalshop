@@ -7,195 +7,208 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   :root {
-    --green: #1a7a4a;
-    --green-light: #e8f5ee;
-    --green-mid: #2fa365;
-    --red: #c0392b;
-    --red-light: #fdecea;
-    --amber: #e67e22;
-    --amber-light: #fef3e2;
-    --blue: #1565c0;
-    --blue-light: #e3f0ff;
-    --sky: #0284c7;
-    --sky-light: #e0f2fe;
-    --yellow: #ca8a04;
-    --yellow-light: #fef9c3;
-    --bg: #f5f7f5;
-    --card: #ffffff;
-    --border: #dde8e2;
-    --text: #1a2e22;
-    --muted: #6b8070;
-    --shadow: 0 2px 12px rgba(26,122,74,0.08);
-    --radius: 12px;
+    --green: #1a7a4a; --green-light: #e8f5ee; --green-mid: #2fa365;
+    --red: #c0392b; --red-light: #fdecea; --amber: #e67e22; --amber-light: #fef3e2;
+    --blue: #1565c0; --blue-light: #e3f0ff; --sky: #0284c7; --sky-light: #e0f2fe;
+    --yellow: #ca8a04; --yellow-light: #fef9c3; --purple: #7c3aed; --purple-light: #ede9fe;
+    --bg: #f5f7f5; --card: #ffffff; --border: #dde8e2; --text: #1a2e22; --muted: #6b8070;
+    --shadow: 0 2px 12px rgba(26,122,74,0.08); --radius: 12px;
   }
-
   body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  #loginScreen { min-height:100vh; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#0d5c34 0%,#1a7a4a 50%,#2fa365 100%); position:relative; overflow:hidden; }
+  #loginScreen::before{content:'';position:absolute;width:600px;height:600px;border-radius:50%;background:rgba(255,255,255,0.04);top:-200px;right:-150px;}
+  #loginScreen::after{content:'';position:absolute;width:400px;height:400px;border-radius:50%;background:rgba(255,255,255,0.04);bottom:-100px;left:-100px;}
+  .login-card{background:white;border-radius:20px;padding:48px 44px;width:420px;box-shadow:0 24px 60px rgba(0,0,0,0.2);position:relative;z-index:1;}
+  .login-logo{display:flex;align-items:center;gap:12px;margin-bottom:32px;}
+  .login-logo-icon{width:44px;height:44px;background:var(--green);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;}
+  .login-logo h1{font-family:'Instrument Serif',serif;font-size:22px;color:var(--text);letter-spacing:-0.5px;line-height:1.2;}
+  .login-logo span{color:var(--green);}
+  .login-card h2{font-size:22px;font-weight:600;margin-bottom:6px;}
+  .login-card p{color:var(--muted);font-size:14px;margin-bottom:28px;}
+  .field{margin-bottom:18px;}
+  .field label{display:block;font-size:13px;font-weight:500;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;}
+  .field input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:15px;color:var(--text);background:#fafcfb;outline:none;transition:border-color 0.2s;}
+  .field input:focus{border-color:var(--green-mid);background:white;}
+  .btn-primary{width:100%;padding:13px;background:var(--green);color:white;border:none;border-radius:10px;font-family:inherit;font-size:15px;font-weight:500;cursor:pointer;transition:background 0.2s,transform 0.1s;margin-top:6px;}
+  .btn-primary:hover{background:#155e39;}
+  .btn-primary:active{transform:scale(0.98);}
+  .login-error{background:var(--red-light);color:var(--red);border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:16px;display:none;}
+  .login-hint{margin-top:20px;text-align:center;font-size:12px;color:var(--muted);}
+  #appScreen{display:none;}
+  .topbar{background:white;border-bottom:1px solid var(--border);padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 1px 8px rgba(0,0,0,0.06);}
+  .topbar-logo{font-family:'Instrument Serif',serif;font-size:18px;color:var(--text);line-height:1.2;}
+  .topbar-logo span{color:var(--green);}
+  .topbar-right{display:flex;align-items:center;gap:10px;}
+  .topbar-user{font-size:14px;color:var(--muted);font-weight:500;}
+  .btn-logout{padding:7px 16px;background:var(--red-light);color:var(--red);border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;}
+  .btn-logout:hover{background:#f9d4d0;}
+  .btn-printer{padding:7px 14px;background:var(--blue-light);color:var(--blue);border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;max-width:220px;overflow:hidden;text-overflow:ellipsis;}
+  .btn-printer:hover{background:#cce0ff;}
+  .btn-printer.connected{background:var(--green-light);color:var(--green);}
+  .nav-tabs{background:white;border-bottom:1px solid var(--border);display:flex;padding:0 28px;gap:0;overflow-x:auto;}
+  .nav-tab{padding:14px 20px;font-size:14px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;transition:all 0.2s;user-select:none;white-space:nowrap;}
+  .nav-tab.active{color:var(--green);border-bottom-color:var(--green);}
+  .nav-tab:hover:not(.active){color:var(--text);background:var(--bg);}
+  .nav-tab .badge{display:inline-flex;align-items:center;justify-content:center;background:var(--red);color:white;border-radius:10px;font-size:11px;font-weight:600;min-width:18px;height:18px;padding:0 5px;margin-left:6px;}
+  .page{display:none;padding:28px;max-width:1100px;margin:0 auto;}
+  .page.active{display:block;}
+  .card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:24px;box-shadow:var(--shadow);margin-bottom:24px;}
+  .card-title{font-size:16px;font-weight:600;margin-bottom:18px;color:var(--text);display:flex;align-items:center;gap:8px;}
+  .form-group{display:flex;flex-direction:column;gap:5px;}
+  .form-group label{font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;}
+  .form-group input,.form-group select{padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;color:var(--text);background:#fafcfb;outline:none;transition:border-color 0.2s;width:100%;}
+  .form-group input:focus,.form-group select:focus{border-color:var(--green-mid);background:white;}
+  .btn-add{padding:10px 20px;background:var(--green);color:white;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap;transition:background 0.2s;height:40px;}
+  .btn-add:hover{background:#155e39;}
+  .table-wrap{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;font-size:14px;}
+  th{padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;background:var(--bg);border-bottom:1px solid var(--border);}
+  td{padding:12px 14px;border-bottom:1px solid #f0f4f2;color:var(--text);}
+  tr:last-child td{border-bottom:none;}
+  tr:hover td{background:#f9fbfa;}
+  .status-pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500;}
+  .status-safe{background:var(--green-light);color:#1a5c35;}
+  .status-year{background:var(--yellow-light);color:var(--yellow);}
+  .status-warning{background:var(--sky-light);color:var(--sky);}
+  .status-expired{background:var(--red-light);color:var(--red);}
+  .qty-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;}
+  .qty-good{background:#dcfce7;color:#15803d;}
+  .qty-ok{background:#fef9c3;color:#854d0e;}
+  .qty-danger{background:#fee2e2;color:#991b1b;}
+  .qty-none{background:#f1f5f9;color:#64748b;}
+  .type-tablet{background:#dbeafe;color:#1e40af;}
+  .type-syrup{background:#fce7f3;color:#9d174d;}
+  .type-injection{background:#ede9fe;color:#5b21b6;}
+  .type-other{background:#f1f5f9;color:#475569;}
+  .btn-sm{padding:5px 12px;border:none;border-radius:6px;font-family:inherit;font-size:12px;font-weight:500;cursor:pointer;transition:all 0.15s;}
+  .btn-danger{background:var(--red-light);color:var(--red);}
+  .btn-danger:hover{background:#f9d0cd;}
+  .btn-success{background:var(--green-light);color:var(--green);}
+  .btn-success:hover{background:#d2eddb;}
+  .btn-blue{background:var(--blue-light);color:var(--blue);}
+  .btn-blue:hover{background:#cce0ff;}
+  .btn-amber{background:var(--amber-light);color:var(--amber);}
+  .btn-amber:hover{background:#fde8c4;}
+  .btn-purple{background:var(--purple-light);color:var(--purple);}
+  .btn-purple:hover{background:#ddd6fe;}
+  .empty-state{text-align:center;padding:48px 20px;color:var(--muted);}
+  .empty-state .icon{font-size:40px;margin-bottom:12px;}
+  .empty-state p{font-size:15px;}
+  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+  .stat-card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:18px 20px;}
+  .stat-label{font-size:12px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px;}
+  .stat-value{font-size:26px;font-weight:600;color:var(--text);}
+  .stat-value.green{color:var(--green);}
+  .stat-value.red{color:var(--red);}
+  .stat-value.amber{color:var(--amber);}
+  .stat-value.sky{color:var(--sky);}
+  .stat-value.yellow{color:var(--yellow);}
+  .stat-value.purple{color:var(--purple);}
+  .billing-grid{display:grid;grid-template-columns:1fr 380px;gap:24px;align-items:start;}
+  .cart-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f0f4f2;}
+  .cart-item:last-child{border-bottom:none;}
+  .cart-name{flex:1;font-weight:500;font-size:14px;}
+  .cart-price{color:var(--muted);font-size:13px;}
+  .cart-qty{display:flex;align-items:center;gap:6px;}
+  .qty-btn{width:26px;height:26px;border:1px solid var(--border);border-radius:6px;background:white;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--text);font-weight:500;}
+  .qty-btn:hover{background:var(--bg);}
+  .qty-val{font-size:14px;font-weight:500;min-width:20px;text-align:center;}
+  .bill-summary{border-top:1px solid var(--border);margin-top:16px;padding-top:16px;}
+  .bill-row{display:flex;justify-content:space-between;padding:5px 0;font-size:14px;color:var(--muted);}
+  .bill-row.total{font-size:17px;font-weight:600;color:var(--text);border-top:1px solid var(--border);margin-top:8px;padding-top:12px;}
+  .btn-generate{width:100%;margin-top:16px;padding:13px;background:var(--green);color:white;border:none;border-radius:10px;font-family:inherit;font-size:15px;font-weight:500;cursor:pointer;}
+  .btn-generate:hover{background:#155e39;}
+  .search-wrapper{position:relative;}
+  .autocomplete-list{position:absolute;top:100%;left:0;right:0;background:white;border:1.5px solid var(--green-mid);border-top:none;border-radius:0 0 10px 10px;z-index:200;max-height:260px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,0.12);}
+  .autocomplete-item{padding:10px 14px;cursor:pointer;font-size:14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #f0f4f2;}
+  .autocomplete-item:last-child{border-bottom:none;}
+  .autocomplete-item:hover,.autocomplete-item.selected{background:var(--green-light);}
+  .autocomplete-item .ac-name{flex:1;font-weight:500;}
+  .autocomplete-item .ac-price{color:var(--muted);font-size:13px;}
+  .autocomplete-item .ac-type{font-size:11px;padding:2px 8px;border-radius:20px;}
+  .autocomplete-item .ac-qty{font-size:12px;font-weight:600;}
+  .ac-highlight{background:var(--yellow-light);border-radius:2px;padding:0 1px;}
+  .shortage-section{margin-bottom:32px;}
+  .shortage-section-title{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:600;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--border);}
+  .shortage-card{background:white;border-radius:10px;border:2px solid;padding:16px 18px;display:flex;align-items:center;gap:14px;margin-bottom:10px;transition:transform 0.15s;}
+  .shortage-card:hover{transform:translateX(3px);}
+  .shortage-card.danger{border-color:#fecaca;background:#fff5f5;}
+  .shortage-card.ok{border-color:#fef08a;background:#fefce8;}
+  .shortage-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+  .shortage-card.danger .shortage-icon{background:#fee2e2;}
+  .shortage-card.ok .shortage-icon{background:#fef9c3;}
+  .shortage-info{flex:1;}
+  .shortage-name{font-weight:600;font-size:14px;margin-bottom:3px;}
+  .shortage-meta{font-size:12px;color:var(--muted);}
+  .shortage-qty{text-align:right;}
+  .shortage-qty-val{font-size:22px;font-weight:700;}
+  .shortage-qty-label{font-size:11px;color:var(--muted);}
+  .shortage-card.danger .shortage-qty-val{color:var(--red);}
+  .shortage-card.ok .shortage-qty-val{color:var(--yellow);}
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:999;}
+  .modal-bg.open{display:flex;}
+  .modal{background:white;border-radius:16px;padding:36px;width:480px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.25);}
+  .receipt-header{text-align:center;border-bottom:2px dashed var(--border);padding-bottom:20px;margin-bottom:20px;}
+  .receipt-header h2{font-family:'Instrument Serif',serif;font-size:22px;color:var(--green);}
+  .receipt-header .store-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+  .receipt-header p{font-size:13px;color:var(--muted);margin-top:4px;}
+  .receipt-table{width:100%;font-size:13px;margin-bottom:16px;}
+  .receipt-table th{font-size:11px;color:var(--muted);font-weight:600;padding:6px 0;border-bottom:1px solid var(--border);}
+  .receipt-table td{padding:8px 0;border-bottom:1px dashed #eee;}
+  .receipt-total{font-size:18px;font-weight:600;text-align:right;padding-top:10px;color:var(--green);}
+  .receipt-footer{text-align:center;margin-top:20px;font-size:12px;color:var(--muted);border-top:1px dashed var(--border);padding-top:16px;}
+  .modal-actions{display:flex;flex-direction:column;gap:8px;margin-top:20px;}
+  .modal-actions-row{display:flex;gap:8px;}
+  .btn-print{flex:1;padding:11px;background:var(--green);color:white;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;}
+  .btn-bt-print{flex:1;padding:11px;background:var(--blue);color:white;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;}
+  .btn-bt-print:disabled{opacity:0.38;cursor:not-allowed;background:#90a4ae;}
+  .btn-bt-print.connected{background:var(--green);}
+  .btn-newbill{flex:1;padding:11px;background:var(--blue-light);color:var(--blue);border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;}
+  .btn-close{flex:1;padding:11px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;}
+  .bt-status-hint{font-size:12px;text-align:center;color:var(--muted);padding:2px 0;}
+  #btDebugLog{display:none;background:#1a1a1a;color:#00ff88;font-family:monospace;font-size:11px;padding:10px 14px;border-radius:8px;margin-top:10px;max-height:120px;overflow-y:auto;}
+  .edit-modal{background:white;border-radius:16px;padding:32px;width:440px;box-shadow:0 20px 60px rgba(0,0,0,0.25);}
+  .edit-modal h3{font-size:18px;font-weight:600;margin-bottom:20px;}
+  .edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+  .edit-full{grid-column:span 2;}
+  .edit-actions{display:flex;gap:10px;margin-top:20px;}
+  .search-row{display:flex;gap:10px;margin-bottom:16px;align-items:center;}
+  .search-input{flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;outline:none;background:#fafcfb;transition:border-color 0.2s;}
+  .search-input:focus{border-color:var(--green-mid);}
+  .filter-select{padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;outline:none;background:white;color:var(--text);cursor:pointer;}
+  .billing-add-row{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:end;}
+  .bill-search-wrap{position:relative;}
+  .billing-search-input{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;outline:none;background:#fafcfb;transition:border-color 0.2s;}
+  .billing-search-input:focus{border-color:var(--green-mid);}
+  .bill-record{padding:14px 0;border-bottom:1px solid #f0f4f2;display:flex;align-items:center;justify-content:space-between;}
+  .bill-record:last-child{border-bottom:none;}
+  #printerStatusBar{display:none;background:var(--green-light);color:var(--green);font-size:13px;font-weight:500;text-align:center;padding:6px;border-bottom:1px solid #b2ddc4;}
+  .inv-input-row{display:grid;grid-template-columns:2fr 1.2fr 0.8fr 0.8fr 0.8fr auto;gap:10px;align-items:end;}
 
-  #loginScreen {
-    min-height: 100vh; display: flex; align-items: center; justify-content: center;
-    background: linear-gradient(135deg, #0d5c34 0%, #1a7a4a 50%, #2fa365 100%);
-    position: relative; overflow: hidden;
+  /* ── STOCK DEDUCTION NOTICE ── */
+  .stock-deduct-notice{background:var(--amber-light);border:1px solid #f5cba7;border-radius:8px;padding:10px 14px;font-size:13px;color:var(--amber);margin-top:12px;display:none;}
+  .stock-deduct-notice.visible{display:block;}
+
+  @media(max-width:900px){
+    .stats-row{grid-template-columns:repeat(2,1fr);}
+    .billing-grid{grid-template-columns:1fr;}
+    .inv-input-row{grid-template-columns:1fr 1fr;}.inv-input-row .btn-add{grid-column:span 2;}
+    .topbar-right{gap:6px;}
+    .btn-printer{font-size:12px;padding:6px 10px;}
   }
-  #loginScreen::before { content:''; position:absolute; width:600px; height:600px; border-radius:50%; background:rgba(255,255,255,0.04); top:-200px; right:-150px; }
-  #loginScreen::after  { content:''; position:absolute; width:400px; height:400px; border-radius:50%; background:rgba(255,255,255,0.04); bottom:-100px; left:-100px; }
-  .login-card { background:white; border-radius:20px; padding:48px 44px; width:420px; box-shadow:0 24px 60px rgba(0,0,0,0.2); position:relative; z-index:1; }
-  .login-logo { display:flex; align-items:center; gap:12px; margin-bottom:32px; }
-  .login-logo-icon { width:44px; height:44px; background:var(--green); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; }
-  .login-logo h1 { font-family:'Instrument Serif',serif; font-size:22px; color:var(--text); letter-spacing:-0.5px; line-height:1.2; }
-  .login-logo span { color:var(--green); }
-  .login-card h2 { font-size:22px; font-weight:600; margin-bottom:6px; color:var(--text); }
-  .login-card p  { color:var(--muted); font-size:14px; margin-bottom:28px; }
-  .field { margin-bottom:18px; }
-  .field label { display:block; font-size:13px; font-weight:500; color:var(--muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px; }
-  .field input { width:100%; padding:12px 14px; border:1.5px solid var(--border); border-radius:10px; font-family:inherit; font-size:15px; color:var(--text); background:#fafcfb; outline:none; transition:border-color 0.2s; }
-  .field input:focus { border-color:var(--green-mid); background:white; }
-  .btn-primary { width:100%; padding:13px; background:var(--green); color:white; border:none; border-radius:10px; font-family:inherit; font-size:15px; font-weight:500; cursor:pointer; transition:background 0.2s, transform 0.1s; margin-top:6px; }
-  .btn-primary:hover { background:#155e39; }
-  .btn-primary:active { transform:scale(0.98); }
-  .login-error { background:var(--red-light); color:var(--red); border-radius:8px; padding:10px 14px; font-size:13px; margin-bottom:16px; display:none; }
-  .login-hint { margin-top:20px; text-align:center; font-size:12px; color:var(--muted); }
-
-  #appScreen { display:none; }
-  .topbar { background:white; border-bottom:1px solid var(--border); padding:0 28px; height:60px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; box-shadow:0 1px 8px rgba(0,0,0,0.06); }
-  .topbar-logo { font-family:'Instrument Serif',serif; font-size:18px; color:var(--text); line-height:1.2; }
-  .topbar-logo span { color:var(--green); }
-  .topbar-right { display:flex; align-items:center; gap:10px; }
-  .topbar-user { font-size:14px; color:var(--muted); font-weight:500; }
-  .btn-logout { padding:7px 16px; background:var(--red-light); color:var(--red); border:none; border-radius:8px; font-family:inherit; font-size:13px; font-weight:500; cursor:pointer; transition:background 0.2s; }
-  .btn-logout:hover { background:#f9d4d0; }
-  .btn-printer { padding:7px 14px; background:var(--blue-light); color:var(--blue); border:none; border-radius:8px; font-family:inherit; font-size:13px; font-weight:500; cursor:pointer; transition:all 0.2s; white-space:nowrap; max-width:220px; overflow:hidden; text-overflow:ellipsis; }
-  .btn-printer:hover { background:#cce0ff; }
-  .btn-printer.connected { background:var(--green-light); color:var(--green); }
-
-  .nav-tabs { background:white; border-bottom:1px solid var(--border); display:flex; padding:0 28px; gap:0; }
-  .nav-tab { padding:14px 22px; font-size:14px; font-weight:500; color:var(--muted); cursor:pointer; border-bottom:3px solid transparent; transition:all 0.2s; user-select:none; }
-  .nav-tab.active { color:var(--green); border-bottom-color:var(--green); }
-  .nav-tab:hover:not(.active) { color:var(--text); background:var(--bg); }
-
-  .page { display:none; padding:28px; max-width:1100px; margin:0 auto; }
-  .page.active { display:block; }
-
-  .card { background:var(--card); border-radius:var(--radius); border:1px solid var(--border); padding:24px; box-shadow:var(--shadow); margin-bottom:24px; }
-  .card-title { font-size:16px; font-weight:600; margin-bottom:18px; color:var(--text); display:flex; align-items:center; gap:8px; }
-  .input-row { display:grid; grid-template-columns:2fr 1.5fr 1fr auto; gap:10px; align-items:end; }
-  .form-group { display:flex; flex-direction:column; gap:5px; }
-  .form-group label { font-size:12px; font-weight:500; color:var(--muted); text-transform:uppercase; letter-spacing:0.4px; }
-  .form-group input, .form-group select { padding:10px 12px; border:1.5px solid var(--border); border-radius:8px; font-family:inherit; font-size:14px; color:var(--text); background:#fafcfb; outline:none; transition:border-color 0.2s; width:100%; }
-  .form-group input:focus, .form-group select:focus { border-color:var(--green-mid); background:white; }
-  .btn-add { padding:10px 20px; background:var(--green); color:white; border:none; border-radius:8px; font-family:inherit; font-size:14px; font-weight:500; cursor:pointer; white-space:nowrap; transition:background 0.2s; height:40px; }
-  .btn-add:hover { background:#155e39; }
-
-  .table-wrap { overflow-x:auto; }
-  table { width:100%; border-collapse:collapse; font-size:14px; }
-  th { padding:10px 14px; text-align:left; font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; background:var(--bg); border-bottom:1px solid var(--border); }
-  td { padding:13px 14px; border-bottom:1px solid #f0f4f2; color:var(--text); }
-  tr:last-child td { border-bottom:none; }
-  tr:hover td { background:#f9fbfa; }
-
-  .status-pill { display:inline-block; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:500; }
-  .status-safe    { background:var(--green-light);  color:#1a5c35; }
-  .status-year    { background:var(--yellow-light); color:var(--yellow); }
-  .status-warning { background:var(--sky-light);    color:var(--sky); }
-  .status-expired { background:var(--red-light);    color:var(--red); }
-
-  .btn-sm { padding:5px 12px; border:none; border-radius:6px; font-family:inherit; font-size:12px; font-weight:500; cursor:pointer; transition:all 0.15s; }
-  .btn-danger  { background:var(--red-light);  color:var(--red);  }
-  .btn-danger:hover  { background:#f9d0cd; }
-  .btn-success { background:var(--green-light); color:var(--green); }
-  .btn-success:hover { background:#d2eddb; }
-  .btn-blue    { background:var(--blue-light); color:var(--blue); }
-  .btn-blue:hover    { background:#cce0ff; }
-
-  .empty-state { text-align:center; padding:48px 20px; color:var(--muted); }
-  .empty-state .icon { font-size:40px; margin-bottom:12px; }
-  .empty-state p { font-size:15px; }
-
-  .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
-  .stat-card { background:var(--card); border-radius:var(--radius); border:1px solid var(--border); padding:18px 20px; }
-  .stat-label { font-size:12px; color:var(--muted); font-weight:500; text-transform:uppercase; letter-spacing:0.4px; margin-bottom:8px; }
-  .stat-value { font-size:26px; font-weight:600; color:var(--text); }
-  .stat-value.green  { color:var(--green); }
-  .stat-value.red    { color:var(--red);   }
-  .stat-value.amber  { color:var(--amber); }
-  .stat-value.sky    { color:var(--sky);   }
-  .stat-value.yellow { color:var(--yellow);}
-
-  .billing-grid { display:grid; grid-template-columns:1fr 380px; gap:24px; align-items:start; }
-  .cart-item { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid #f0f4f2; }
-  .cart-item:last-child { border-bottom:none; }
-  .cart-name  { flex:1; font-weight:500; font-size:14px; }
-  .cart-price { color:var(--muted); font-size:13px; }
-  .cart-qty   { display:flex; align-items:center; gap:6px; }
-  .qty-btn    { width:26px; height:26px; border:1px solid var(--border); border-radius:6px; background:white; cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center; color:var(--text); font-weight:500; }
-  .qty-btn:hover { background:var(--bg); }
-  .qty-val    { font-size:14px; font-weight:500; min-width:20px; text-align:center; }
-
-  .bill-summary { border-top:1px solid var(--border); margin-top:16px; padding-top:16px; }
-  .bill-row { display:flex; justify-content:space-between; padding:5px 0; font-size:14px; color:var(--muted); }
-  .bill-row.total { font-size:17px; font-weight:600; color:var(--text); border-top:1px solid var(--border); margin-top:8px; padding-top:12px; }
-  .btn-generate { width:100%; margin-top:16px; padding:13px; background:var(--green); color:white; border:none; border-radius:10px; font-family:inherit; font-size:15px; font-weight:500; cursor:pointer; transition:background 0.2s; }
-  .btn-generate:hover { background:#155e39; }
-
-  .modal-bg { position:fixed; inset:0; background:rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; z-index:999; }
-  .modal-bg.open { display:flex; }
-  .modal { background:white; border-radius:16px; padding:36px; width:480px; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.25); }
-  .receipt-header { text-align:center; border-bottom:2px dashed var(--border); padding-bottom:20px; margin-bottom:20px; }
-  .receipt-header h2 { font-family:'Instrument Serif',serif; font-size:22px; color:var(--green); }
-  .receipt-header .store-sub { font-size:12px; color:var(--muted); margin-top:2px; }
-  .receipt-header p { font-size:13px; color:var(--muted); margin-top:4px; }
-  .receipt-table { width:100%; font-size:13px; margin-bottom:16px; }
-  .receipt-table th { font-size:11px; color:var(--muted); font-weight:600; padding:6px 0; border-bottom:1px solid var(--border); }
-  .receipt-table td { padding:8px 0; border-bottom:1px dashed #eee; }
-  .receipt-total { font-size:18px; font-weight:600; text-align:right; padding-top:10px; color:var(--green); }
-  .receipt-footer { text-align:center; margin-top:20px; font-size:12px; color:var(--muted); border-top:1px dashed var(--border); padding-top:16px; }
-  .modal-actions { display:flex; flex-direction:column; gap:8px; margin-top:20px; }
-  .modal-actions-row { display:flex; gap:8px; }
-  .btn-print    { flex:1; padding:11px; background:var(--green); color:white; border:none; border-radius:8px; font-family:inherit; font-size:14px; font-weight:500; cursor:pointer; }
-  .btn-bt-print { flex:1; padding:11px; background:var(--blue); color:white; border:none; border-radius:8px; font-family:inherit; font-size:13px; font-weight:500; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:background 0.2s; }
-  .btn-bt-print:hover:not(:disabled) { background:#0d47a1; }
-  .btn-bt-print:disabled { opacity:0.38; cursor:not-allowed; background:#90a4ae; }
-  .btn-bt-print.connected { background:var(--green); }
-  .btn-bt-print.connected:hover:not(:disabled) { background:#155e39; }
-  .btn-newbill  { flex:1; padding:11px; background:var(--blue-light); color:var(--blue); border:none; border-radius:8px; font-family:inherit; font-size:14px; font-weight:500; cursor:pointer; }
-  .btn-close    { flex:1; padding:11px; background:var(--bg); color:var(--text); border:1px solid var(--border); border-radius:8px; font-family:inherit; font-size:14px; font-weight:500; cursor:pointer; }
-  .bt-status-hint { font-size:12px; text-align:center; color:var(--muted); padding:2px 0; }
-
-  .search-row { display:flex; gap:10px; margin-bottom:16px; align-items:center; }
-  .search-input { flex:1; padding:10px 14px; border:1.5px solid var(--border); border-radius:8px; font-family:inherit; font-size:14px; outline:none; background:#fafcfb; transition:border-color 0.2s; }
-  .search-input:focus { border-color:var(--green-mid); }
-  .filter-select { padding:10px 12px; border:1.5px solid var(--border); border-radius:8px; font-family:inherit; font-size:14px; outline:none; background:white; color:var(--text); cursor:pointer; }
-
-  .billing-add-row { display:grid; grid-template-columns:2fr 1fr auto; gap:10px; align-items:end; }
-
-  .bill-record { padding:14px 0; border-bottom:1px solid #f0f4f2; display:flex; align-items:center; justify-content:space-between; }
-  .bill-record:last-child { border-bottom:none; }
-
-  #printerStatusBar { display:none; background:var(--green-light); color:var(--green); font-size:13px; font-weight:500; text-align:center; padding:6px; border-bottom:1px solid #b2ddc4; }
-
-  /* Printer debug log */
-  #btDebugLog { display:none; background:#1a1a1a; color:#00ff88; font-family:monospace; font-size:11px; padding:10px 14px; border-radius:8px; margin-top:10px; max-height:120px; overflow-y:auto; }
-
-  @media (max-width:768px) {
-    .stats-row { grid-template-columns:repeat(2,1fr); }
-    .billing-grid { grid-template-columns:1fr; }
-    .input-row { grid-template-columns:1fr; }
-    .billing-add-row { grid-template-columns:1fr; }
-    .topbar-right { gap:6px; }
-    .btn-printer { font-size:12px; padding:6px 10px; }
-  }
-  @media print {
-    body * { visibility:hidden !important; }
-    #receiptModal, #receiptModal * { visibility:visible !important; }
-    #receiptModal { position:fixed !important; inset:0 !important; background:white !important; display:block !important; z-index:9999 !important; padding:0 !important; }
-    .modal { position:absolute !important; top:20px !important; left:50% !important; transform:translateX(-50%) !important; box-shadow:none !important; border:none !important; width:480px !important; max-height:none !important; overflow:visible !important; }
-    .modal-actions { display:none !important; }
+  @media print{
+    body *{visibility:hidden!important;}
+    #receiptModal,#receiptModal *{visibility:visible!important;}
+    #receiptModal{position:fixed!important;inset:0!important;background:white!important;display:block!important;z-index:9999!important;padding:0!important;}
+    .modal{position:absolute!important;top:20px!important;left:50%!important;transform:translateX(-50%)!important;box-shadow:none!important;border:none!important;width:480px!important;max-height:none!important;overflow:visible!important;}
+    .modal-actions{display:none!important;}
   }
 </style>
 </head>
 <body>
 
+<!-- LOGIN -->
 <div id="loginScreen">
   <div class="login-card">
     <div class="login-logo">
@@ -205,22 +218,23 @@
     <h2>Welcome back</h2>
     <p>Sign in to manage your pharmacy</p>
     <div class="login-error" id="loginError">Invalid username or password</div>
-    <div class="field">
-      <label>Username</label>
-      <input type="text" id="loginUser" placeholder="Enter username" autocomplete="username" />
-    </div>
-    <div class="field">
-      <label>Password</label>
-      <input type="password" id="loginPass" placeholder="Enter password" autocomplete="current-password" />
+    <div class="field"><label>Username</label><input type="text" id="loginUser" placeholder="Enter username" autocomplete="username"/></div>
+    <div class="field"><label>Password</label><input type="password" id="loginPass" placeholder="Enter password" autocomplete="current-password"/></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;margin-top:-6px">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;color:#4a6358;user-select:none">
+        <input type="checkbox" id="rememberMe" style="width:16px;height:16px;accent-color:#1a7a4a;cursor:pointer"/>
+        Remember me
+      </label>
+      <span id="savedUserHint" style="font-size:12px;color:#2fa365;display:none">✅ Credentials saved</span>
     </div>
     <button class="btn-primary" onclick="doLogin()">Sign In</button>
     <div class="login-hint">Contact your admin to get account access</div>
   </div>
 </div>
 
+<!-- APP -->
 <div id="appScreen">
   <div id="printerStatusBar">🖨️ Bluetooth printer connected — receipts will print wirelessly</div>
-
   <div class="topbar">
     <div class="topbar-logo">Rajeshwari Medical <span>& General Store</span></div>
     <div class="topbar-right">
@@ -229,12 +243,12 @@
       <button class="btn-logout" onclick="doLogout()">Sign Out</button>
     </div>
   </div>
-
   <div class="nav-tabs">
     <div class="nav-tab active" onclick="switchTab('inventory',this)">📦 Inventory</div>
     <div class="nav-tab" onclick="switchTab('billing',this)">🧾 Billing</div>
+    <div class="nav-tab" onclick="switchTab('shortage',this)">⚠️ Shortage <span class="badge" id="shortageBadge" style="display:none">0</span></div>
     <div class="nav-tab" onclick="switchTab('history',this)">📋 Bill History</div>
-    <div class="nav-tab" id="adminTab" onclick="switchTab('admin',this)" style="display:none">⚙️ Admin Panel</div>
+    <div class="nav-tab" id="adminTab" onclick="switchTab('admin',this)" style="display:none">⚙️ Admin</div>
   </div>
 
   <!-- INVENTORY PAGE -->
@@ -243,29 +257,38 @@
       <div class="stat-card"><div class="stat-label">Total Medicines</div><div class="stat-value green" id="statTotal">0</div></div>
       <div class="stat-card"><div class="stat-label">Expired</div><div class="stat-value red" id="statExpired">0</div></div>
       <div class="stat-card"><div class="stat-label">≤6 Months</div><div class="stat-value sky" id="statWarning">0</div></div>
-      <div class="stat-card"><div class="stat-label">6–12 Months</div><div class="stat-value yellow" id="statYear">0</div></div>
+      <div class="stat-card"><div class="stat-label">Low Stock ⚠️</div><div class="stat-value amber" id="statLow">0</div></div>
       <div class="stat-card"><div class="stat-label">Good Stock</div><div class="stat-value green" id="statGood">0</div></div>
     </div>
     <div class="card">
       <div class="card-title">➕ Add Medicine to Stock</div>
-      <div class="input-row">
-        <div class="form-group"><label>Medicine Name</label><input type="text" id="medName" placeholder="e.g. Paracetamol 500mg" /></div>
-        <div class="form-group"><label>Expiry Date</label><input type="date" id="expiryDate" /></div>
-        <div class="form-group"><label>Price (₹)</label><input type="number" id="medPrice" placeholder="0.00" min="0" step="0.01" /></div>
+      <div class="inv-input-row">
+        <div class="form-group"><label>Medicine Name</label><input type="text" id="medName" placeholder="e.g. Paracetamol 500mg"/></div>
+        <div class="form-group"><label>Expiry Date</label><input type="date" id="expiryDate"/></div>
+        <div class="form-group"><label>Type</label>
+          <select id="medType">
+            <option value="tablet">💊 Tablet</option>
+            <option value="syrup">🍶 Syrup</option>
+            <option value="injection">💉 Injection</option>
+            <option value="other">📦 Other</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Qty / Units</label><input type="number" id="medQty" placeholder="100" min="0" step="1"/></div>
+        <div class="form-group"><label>Price (₹)</label><input type="number" id="medPrice" placeholder="0.00" min="0" step="0.01"/></div>
         <button class="btn-add" onclick="addMedicine()">+ Add</button>
       </div>
     </div>
     <div class="card">
       <div class="card-title">📦 Stock List
-        <div style="margin-left:auto;font-size:12px;display:flex;gap:8px;font-weight:400;color:var(--muted);align-items:center">
-          <span style="background:var(--green-light);color:#1a5c35;padding:2px 8px;border-radius:20px;font-size:11px">● Good (&gt;1yr)</span>
-          <span style="background:var(--yellow-light);color:var(--yellow);padding:2px 8px;border-radius:20px;font-size:11px">● 6–12 Months</span>
-          <span style="background:var(--sky-light);color:var(--sky);padding:2px 8px;border-radius:20px;font-size:11px">● ≤6 Months</span>
-          <span style="background:var(--red-light);color:var(--red);padding:2px 8px;border-radius:20px;font-size:11px">● Expired</span>
+        <div style="margin-left:auto;font-size:11px;display:flex;gap:6px;flex-wrap:wrap;font-weight:400;color:var(--muted);align-items:center">
+          <span style="background:var(--green-light);color:#1a5c35;padding:2px 8px;border-radius:20px">● Good</span>
+          <span style="background:var(--yellow-light);color:var(--yellow);padding:2px 8px;border-radius:20px">● 6–12mo</span>
+          <span style="background:var(--sky-light);color:var(--sky);padding:2px 8px;border-radius:20px">● ≤6mo</span>
+          <span style="background:var(--red-light);color:var(--red);padding:2px 8px;border-radius:20px">● Expired</span>
         </div>
       </div>
       <div class="search-row">
-        <input class="search-input" type="text" placeholder="Search medicines..." id="searchInput" oninput="renderInventory()" />
+        <input class="search-input" type="text" placeholder="🔍 Search by name, type, expiry..." id="searchInput" oninput="renderInventory()"/>
         <select class="filter-select" id="filterStatus" onchange="renderInventory()">
           <option value="all">All Status</option>
           <option value="safe">Good (&gt;1yr)</option>
@@ -273,14 +296,27 @@
           <option value="warning">≤6 Months</option>
           <option value="expired">Expired</option>
         </select>
+        <select class="filter-select" id="filterType" onchange="renderInventory()">
+          <option value="all">All Types</option>
+          <option value="tablet">Tablet</option>
+          <option value="syrup">Syrup</option>
+          <option value="injection">Injection</option>
+          <option value="other">Other</option>
+        </select>
+        <select class="filter-select" id="filterStock" onchange="renderInventory()">
+          <option value="all">All Stock</option>
+          <option value="danger">Danger</option>
+          <option value="ok">Low Stock</option>
+          <option value="good">Good Stock</option>
+        </select>
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>#</th><th>Medicine Name</th><th>Expiry Date</th><th>Price</th><th>Status</th><th>Action</th></tr></thead>
+          <thead><tr><th>#</th><th>Medicine Name</th><th>Type</th><th>Expiry</th><th>Quantity</th><th>Stock Level</th><th>Price</th><th>Expiry Status</th><th>Actions</th></tr></thead>
           <tbody id="medList"></tbody>
         </table>
       </div>
-      <div id="invEmpty" class="empty-state" style="display:none"><div class="icon">📭</div><p>No medicines in stock. Add some above.</p></div>
+      <div id="invEmpty" class="empty-state" style="display:none"><div class="icon">📭</div><p>No medicines found. Add some above.</p></div>
     </div>
   </div>
 
@@ -289,12 +325,19 @@
     <div class="billing-grid">
       <div>
         <div class="card">
-          <div class="card-title">🔍 Add to Bill</div>
+          <div class="card-title">🔍 Search & Add to Bill</div>
           <div class="billing-add-row">
-            <div class="form-group"><label>Select Medicine</label><select id="billMedSelect"><option value="">-- Choose medicine --</option></select></div>
-            <div class="form-group"><label>Quantity</label><input type="number" id="billQty" value="1" min="1" /></div>
+            <div class="form-group">
+              <label>Search Medicine</label>
+              <div class="bill-search-wrap">
+                <input class="billing-search-input" type="text" id="billSearch" placeholder="Type to search by name or type..." autocomplete="off" oninput="onBillSearch()" onkeydown="onBillSearchKey(event)"/>
+                <div class="autocomplete-list" id="billAutoList" style="display:none"></div>
+              </div>
+            </div>
+            <div class="form-group"><label>Quantity</label><input type="number" id="billQty" value="1" min="1" style="width:90px"/></div>
             <button class="btn-add" onclick="addToBill()">Add</button>
           </div>
+          <div id="selectedMedInfo" style="display:none;margin-top:10px;padding:10px 14px;background:var(--green-light);border-radius:8px;font-size:13px;color:var(--green);font-weight:500"></div>
         </div>
         <div class="card">
           <div class="card-title">🛒 Current Bill Items</div>
@@ -304,17 +347,44 @@
       <div>
         <div class="card" style="position:sticky;top:80px">
           <div class="card-title">🧾 Bill Summary</div>
-          <div class="form-group" style="margin-bottom:14px"><label>Patient / Customer Name</label><input type="text" id="patientName" placeholder="Enter name (optional)" /></div>
-          <div class="form-group" style="margin-bottom:0"><label>Doctor / Prescription Ref</label><input type="text" id="doctorRef" placeholder="Dr. name or Ref. no." /></div>
+          <div class="form-group" style="margin-bottom:14px"><label>Patient / Customer Name</label><input type="text" id="patientName" placeholder="Enter name (optional)"/></div>
+          <div class="form-group" style="margin-bottom:0"><label>Doctor / Prescription Ref</label><input type="text" id="doctorRef" placeholder="Dr. name or Ref. no."/></div>
           <div class="bill-summary">
             <div class="bill-row"><span>Subtotal</span><span id="subtotalAmt">₹0.00</span></div>
             <div class="bill-row"><span>Discount (3%)</span><span id="discountAmt" style="color:var(--green)">-₹0.00</span></div>
             <div class="bill-row total"><span>Total</span><span id="totalAmt">₹0.00</span></div>
           </div>
+          <!-- STOCK DEDUCTION PREVIEW — shown when cart has items -->
+          <div class="stock-deduct-notice" id="stockDeductNotice">
+            📦 <strong>Stock will be updated</strong> when you click "Generate Bill". Items in cart are <em>reserved</em> but not yet deducted from inventory.
+          </div>
           <button class="btn-generate" onclick="generateBill()">Generate Bill & Print</button>
-          <button class="btn-close" style="width:100%;margin-top:10px;padding:10px;border:1px solid var(--border);border-radius:10px;background:var(--bg);font-family:inherit;font-size:14px;cursor:pointer" onclick="clearCart()">Clear Cart</button>
+          <button style="width:100%;margin-top:10px;padding:10px;border:1px solid var(--border);border-radius:10px;background:var(--bg);font-family:inherit;font-size:14px;cursor:pointer" onclick="clearCart()">Clear Cart</button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- SHORTAGE PAGE -->
+  <div class="page" id="page-shortage">
+    <div class="stats-row" style="grid-template-columns:repeat(3,1fr)">
+      <div class="stat-card"><div class="stat-label">Total Low / Danger</div><div class="stat-value red" id="sStatTotal">0</div></div>
+      <div class="stat-card"><div class="stat-label">Critical (Danger)</div><div class="stat-value red" id="sStatDanger">0</div></div>
+      <div class="stat-card"><div class="stat-label">Low Stock (OK)</div><div class="stat-value amber" id="sStatOk">0</div></div>
+    </div>
+    <div id="shortageContent"></div>
+  </div>
+
+  <!-- HISTORY PAGE -->
+  <div class="page" id="page-history">
+    <div class="stats-row" style="grid-template-columns:repeat(3,1fr)">
+      <div class="stat-card"><div class="stat-label">Total Bills</div><div class="stat-value green" id="hStatBills">0</div></div>
+      <div class="stat-card"><div class="stat-label">Total Revenue</div><div class="stat-value green" id="hStatRev">₹0</div></div>
+      <div class="stat-card"><div class="stat-label">Avg Bill Value</div><div class="stat-value amber" id="hStatAvg">₹0</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📋 Bill History</div>
+      <div id="billHistoryList"><div class="empty-state"><div class="icon">📋</div><p>No bills generated yet</p></div></div>
     </div>
   </div>
 
@@ -328,8 +398,8 @@
     <div class="card">
       <div class="card-title">➕ Create New User</div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:end">
-        <div class="form-group"><label>Username</label><input type="text" id="newUserName" placeholder="Enter username" /></div>
-        <div class="form-group"><label>Password</label><input type="password" id="newUserPass" placeholder="Enter password" /></div>
+        <div class="form-group"><label>Username</label><input type="text" id="newUserName" placeholder="Enter username"/></div>
+        <div class="form-group"><label>Password</label><input type="password" id="newUserPass" placeholder="Enter password"/></div>
         <div class="form-group"><label>Role</label><select id="newUserRole"><option value="staff">Staff</option><option value="admin">Admin</option></select></div>
         <button class="btn-add" onclick="adminCreateUser()">+ Create</button>
       </div>
@@ -338,10 +408,7 @@
     <div class="card">
       <div class="card-title">👥 All Users</div>
       <div class="table-wrap">
-        <table>
-          <thead><tr><th>#</th><th>Username</th><th>Role</th><th>New Password</th><th>Change Role</th><th>Action</th></tr></thead>
-          <tbody id="userList"></tbody>
-        </table>
+        <table><thead><tr><th>#</th><th>Username</th><th>Role</th><th>New Password</th><th>Change Role</th><th>Action</th></tr></thead><tbody id="userList"></tbody></table>
       </div>
     </div>
     <div class="card">
@@ -357,25 +424,9 @@
       </div>
       <div id="staffSummaryCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px"></div>
       <div class="table-wrap">
-        <table>
-          <thead><tr><th>Type</th><th>Staff</th><th>Details</th><th>Amount / Price</th><th>Date & Time</th></tr></thead>
-          <tbody id="activityList"></tbody>
-        </table>
+        <table><thead><tr><th>Type</th><th>Staff</th><th>Details</th><th>Amount / Price</th><th>Date & Time</th></tr></thead><tbody id="activityList"></tbody></table>
       </div>
       <div id="activityEmpty" class="empty-state" style="display:none;padding:32px"><div class="icon">🔍</div><p>No activity found</p></div>
-    </div>
-  </div>
-
-  <!-- HISTORY PAGE -->
-  <div class="page" id="page-history">
-    <div class="stats-row" style="grid-template-columns:repeat(3,1fr)">
-      <div class="stat-card"><div class="stat-label">Total Bills</div><div class="stat-value green" id="hStatBills">0</div></div>
-      <div class="stat-card"><div class="stat-label">Total Revenue</div><div class="stat-value green" id="hStatRev">₹0</div></div>
-      <div class="stat-card"><div class="stat-label">Avg Bill Value</div><div class="stat-value amber" id="hStatAvg">₹0</div></div>
-    </div>
-    <div class="card">
-      <div class="card-title">📋 Bill History</div>
-      <div id="billHistoryList"><div class="empty-state"><div class="icon">📋</div><p>No bills generated yet</p></div></div>
     </div>
   </div>
 </div>
@@ -393,499 +444,254 @@
       <div id="btDebugLog"></div>
       <div class="modal-actions-row">
         <button class="btn-newbill" onclick="startNewBill()">🆕 New Bill</button>
-        <button class="btn-close"   onclick="closeReceipt()">Close</button>
+        <button class="btn-close" onclick="closeReceipt()">Close</button>
       </div>
     </div>
   </div>
 </div>
 
+<!-- EDIT MEDICINE MODAL -->
+<div class="modal-bg" id="editModal">
+  <div class="edit-modal">
+    <h3>✏️ Edit Medicine / Restock</h3>
+    <input type="hidden" id="editMedId"/>
+    <div class="edit-grid">
+      <div class="form-group edit-full"><label>Medicine Name</label><input type="text" id="editName" placeholder="Medicine name"/></div>
+      <div class="form-group"><label>Type</label>
+        <select id="editType">
+          <option value="tablet">💊 Tablet</option>
+          <option value="syrup">🍶 Syrup</option>
+          <option value="injection">💉 Injection</option>
+          <option value="other">📦 Other</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Expiry Date</label><input type="date" id="editExpiry"/></div>
+      <div class="form-group"><label>Current Qty</label><input type="number" id="editQtyCurrent" placeholder="0" disabled style="background:#f0f4f2"/></div>
+      <div class="form-group"><label>Add Stock (+)</label><input type="number" id="editQtyAdd" placeholder="0" min="0"/></div>
+      <div class="form-group"><label>Set Qty Directly</label><input type="number" id="editQtySet" placeholder="leave blank to use Add Stock" min="0"/></div>
+      <div class="form-group"><label>Price (₹)</label><input type="number" id="editPrice" placeholder="0.00" min="0" step="0.01"/></div>
+    </div>
+    <div style="background:var(--amber-light);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--amber);margin-bottom:4px">
+      💡 <strong>Restock:</strong> Use "Add Stock" to add new units received. Or "Set Qty Directly" to override total.
+    </div>
+    <div class="edit-actions">
+      <button class="btn-add" style="flex:1" onclick="saveEditMedicine()">💾 Save Changes</button>
+      <button class="btn-close" style="flex:1;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);font-family:inherit;font-size:14px;cursor:pointer" onclick="closeEditModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <script>
-/* ═══════════════════════════════════════════
-   STORAGE HELPER
-═══════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════
+   STORAGE
+═══════════════════════════════════════════════════ */
 const STORE = {
   get(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } },
-  set(k,v){ localStorage.setItem(k, JSON.stringify(v)); },
+  set(k,v){ localStorage.setItem(k,JSON.stringify(v)); }
 };
 
 (function initUsers(){
-  let users = STORE.get('ms_users') || {};
-  let roles = STORE.get('ms_roles') || {};
-  if(users['admin'] === 'admin123'){ delete users['admin']; delete roles['admin']; }
-  if(!users['Revanraj']){ users['Revanraj'] = 'Reni@2628'; }
-  if(!roles['Revanraj']){ roles['Revanraj'] = 'admin'; }
-  STORE.set('ms_users', users);
-  STORE.set('ms_roles', roles);
+  let users = STORE.get('ms_users')||{};
+  let roles = STORE.get('ms_roles')||{};
+  if(users['admin']==='admin123'){ delete users['admin']; delete roles['admin']; }
+  // Remove old admin if exists
+  if(users['Revanraj']){ delete users['Revanraj']; delete roles['Revanraj']; }
+  if(!users['KataSudhakar']){ users['KataSudhakar']='9985277365@s'; }
+  if(!roles['KataSudhakar']){ roles['KataSudhakar']='admin'; }
+  STORE.set('ms_users',users);
+  STORE.set('ms_roles',roles);
 })();
 
 let currentUser = null;
 let cart = [];
+let selectedBillMed = null;
+let acIndex = -1;
 
-/* ═══════════════════════════════════════════
-   BLUETOOTH THERMAL PRINTER
-   Tuned for 58mm RPP02/MTP-II style printers
-   (the black portable printer in your photo)
-═══════════════════════════════════════════ */
-let btDevice = null;
-let btCharacteristic = null;
-
-// All known service UUIDs for common 58mm BT thermal printers
-const PRINTER_SERVICE_UUIDS = [
-  '000018f0-0000-1000-8000-00805f9b34fb',  // Common generic thermal
-  '0000ff00-0000-1000-8000-00805f9b34fb',  // RPP02 / Goojprt
-  '0000ffe0-0000-1000-8000-00805f9b34fb',  // HM-10 BLE serial
-  '49535343-fe7d-4ae5-8fa9-9fafd205e455',  // ISSC UART
-  'e7810a71-73ae-499d-8c15-faa9aef0c3f2',  // Xprinter / Rongta
-  '0000ff12-0000-1000-8000-00805f9b34fb',  // Alternate
-];
-
-// Known TX characteristic UUIDs (write to printer)
-const PRINTER_CHAR_UUIDS = [
-  '0000ff02-0000-1000-8000-00805f9b34fb',  // RPP02 TX — most common for your printer type
-  '00002af1-0000-1000-8000-00805f9b34fb',
-  '49535343-8841-43f4-a8d4-ecbe34729bb3',  // ISSC TX
-  '0000ffe1-0000-1000-8000-00805f9b34fb',  // HM-10 TX
-  'bef8d6c9-9c21-4c9e-b632-bd58c1009f9f',
-  '0000ff01-0000-1000-8000-00805f9b34fb',
-];
-
-function btLog(msg) {
-  const log = document.getElementById('btDebugLog');
-  if (!log) return;
-  log.style.display = 'block';
-  const line = document.createElement('div');
-  line.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg;
-  log.appendChild(line);
-  log.scrollTop = log.scrollHeight;
+/* ═══════════════════════════════════════════════════
+   STOCK THRESHOLDS
+═══════════════════════════════════════════════════ */
+function getStockThresholds(type){
+  switch(type){
+    case 'tablet':    return {good:100, ok:30};
+    case 'syrup':     return {good:10,  ok:5};
+    case 'injection': return {good:10,  ok:5};
+    default:          return {good:20,  ok:10};
+  }
 }
 
-async function connectBTPrinter() {
-  if (!navigator.bluetooth) {
-    showToast('Web Bluetooth not supported. Use Chrome or Edge on Android/Desktop.', 'warn');
-    return;
-  }
-  const btn = document.getElementById('btBtn');
-  btn.textContent = '🔄 Scanning...';
-  btn.disabled = true;
-
-  try {
-    btDevice = await navigator.bluetooth.requestDevice({
-      acceptAllDevices: true,
-      optionalServices: PRINTER_SERVICE_UUIDS
-    });
-  } catch(e) {
-    console.log('BT cancelled:', e.name);
-    resetPrinterBtn();
-    return;
-  }
-
-  btn.textContent = '🔄 Connecting...';
-
-  // GATT connect with retry
-  let server = null;
-  for (let attempt = 1; attempt <= 3; attempt++) {
-    try {
-      if (attempt > 1) await new Promise(r => setTimeout(r, 1200));
-      server = await btDevice.gatt.connect();
-      btLog('GATT connected on attempt ' + attempt);
-      break;
-    } catch(e) {
-      btLog('GATT attempt ' + attempt + ' failed: ' + e.message);
-      if (attempt === 3) {
-        showToast('Cannot connect. Turn printer OFF and ON, then retry.', 'warn');
-        resetPrinterBtn();
-        return;
-      }
-    }
-  }
-
-  // Discover services
-  let allServices = [];
-  try {
-    allServices = await server.getPrimaryServices();
-    btLog('Found ' + allServices.length + ' service(s): ' + allServices.map(s=>s.uuid).join(', '));
-  } catch(e) {
-    btLog('getPrimaryServices failed: ' + e.message);
-  }
-
-  // Try known service UUIDs first, then fall back to discovered
-  let service = null;
-  for (const uuid of PRINTER_SERVICE_UUIDS) {
-    try {
-      service = await server.getPrimaryService(uuid);
-      btLog('Service found: ' + uuid);
-      break;
-    } catch(e) { /* try next */ }
-  }
-  if (!service && allServices.length > 0) {
-    service = allServices[0];
-    btLog('Using first discovered service: ' + service.uuid);
-  }
-  if (!service) {
-    showToast('No printer service found. Is this a thermal printer?', 'warn');
-    resetPrinterBtn();
-    return;
-  }
-
-  // Discover characteristics
-  let chars = [];
-  try {
-    chars = await service.getCharacteristics();
-    btLog('Characteristics: ' + chars.map(c => c.uuid + (c.properties.write?' [W]':'') + (c.properties.writeWithoutResponse?' [WNR]':'')).join(' | '));
-  } catch(e) {
-    btLog('getCharacteristics failed: ' + e.message);
-    // Try each known char UUID individually
-    for (const uuid of PRINTER_CHAR_UUIDS) {
-      try {
-        const c = await service.getCharacteristic(uuid);
-        chars.push(c);
-        btLog('Got char directly: ' + uuid);
-        break;
-      } catch(e2) { /* try next */ }
-    }
-  }
-
-  // Pick the best writable characteristic
-  // Priority: known TX UUIDs first, then any writable char
-  btCharacteristic = null;
-  for (const txUuid of PRINTER_CHAR_UUIDS) {
-    const found = chars.find(c => c.uuid === txUuid);
-    if (found && (found.properties.write || found.properties.writeWithoutResponse)) {
-      btCharacteristic = found;
-      btLog('Using known TX char: ' + txUuid);
-      break;
-    }
-  }
-  if (!btCharacteristic) {
-    // Fall back: any char that can be written
-    btCharacteristic = chars.find(c => c.properties.write || c.properties.writeWithoutResponse);
-    if (btCharacteristic) btLog('Using fallback writable char: ' + btCharacteristic.uuid);
-  }
-
-  if (!btCharacteristic) {
-    showToast('No writable channel found on printer.', 'warn');
-    btLog('ERROR: No writable characteristic found among ' + chars.length + ' chars');
-    resetPrinterBtn();
-    return;
-  }
-
-  // Connected!
-  const name = btDevice.name || 'Thermal Printer';
-  btn.textContent = '✅ ' + name;
-  btn.classList.add('connected');
-  btn.disabled = false;
-  document.getElementById('printerStatusBar').style.display = 'block';
-  updateBtPrintHint();
-  showToast('✅ ' + name + ' connected!', 'success');
-  btLog('Ready to print via: ' + btCharacteristic.uuid);
-
-  btDevice.addEventListener('gattserverdisconnected', () => {
-    btCharacteristic = null;
-    btDevice = null;
-    resetPrinterBtn();
-    document.getElementById('printerStatusBar').style.display = 'none';
-    updateBtPrintHint();
-    showToast('Printer disconnected', 'warn');
-    btLog('Disconnected');
-  });
+function getStockLevel(type, qty){
+  const t = getStockThresholds(type);
+  if(qty === null || qty === undefined || qty === '') return {key:'none', label:'Not Set', cls:'qty-none', icon:'—'};
+  const q = parseInt(qty);
+  if(q === 0) return {key:'danger', label:'Out of Stock', cls:'qty-danger', icon:'❌'};
+  if(q < t.ok)   return {key:'danger', label:'Danger ('+q+')', cls:'qty-danger', icon:'🔴'};
+  if(q < t.good) return {key:'ok',     label:'Low ('+q+')',    cls:'qty-ok',     icon:'🟡'};
+  return              {key:'good',   label:'Good ('+q+')',  cls:'qty-good',   icon:'🟢'};
 }
 
-function resetPrinterBtn() {
-  const btn = document.getElementById('btBtn');
-  btn.textContent = '🖨️ Connect Printer';
-  btn.classList.remove('connected');
-  btn.disabled = false;
+function typeLabel(type){
+  const map={tablet:'💊 Tablet',syrup:'🍶 Syrup',injection:'💉 Injection',other:'📦 Other'};
+  return map[type]||'📦 Other';
+}
+function typeCls(type){
+  const map={tablet:'type-tablet',syrup:'type-syrup',injection:'type-injection',other:'type-other'};
+  return map[type]||'type-other';
 }
 
-/* ═══════════════════════════════════════════
-   ESC/POS RECEIPT BUILDER
-   58mm paper = 32 chars wide
-═══════════════════════════════════════════ */
-function buildEscPos(bill) {
-  const enc = new TextEncoder();
-  const chunks = [];
-  const ESC = 0x1B, GS = 0x1D, LF = 0x0A;
+/* ═══════════════════════════════════════════════════
+   BLUETOOTH PRINTER
+═══════════════════════════════════════════════════ */
+let btDevice=null, btCharacteristic=null;
+const PRINTER_SERVICE_UUIDS=['000018f0-0000-1000-8000-00805f9b34fb','0000ff00-0000-1000-8000-00805f9b34fb','0000ffe0-0000-1000-8000-00805f9b34fb','49535343-fe7d-4ae5-8fa9-9fafd205e455','e7810a71-73ae-499d-8c15-faa9aef0c3f2','0000ff12-0000-1000-8000-00805f9b34fb'];
+const PRINTER_CHAR_UUIDS=['0000ff02-0000-1000-8000-00805f9b34fb','00002af1-0000-1000-8000-00805f9b34fb','49535343-8841-43f4-a8d4-ecbe34729bb3','0000ffe1-0000-1000-8000-00805f9b34fb','bef8d6c9-9c21-4c9e-b632-bd58c1009f9f','0000ff01-0000-1000-8000-00805f9b34fb'];
 
-  const raw  = (...bytes) => chunks.push(new Uint8Array(bytes));
-  const text = (str) => chunks.push(enc.encode(str));
-  const nl   = () => chunks.push(new Uint8Array([LF]));
-  const line = (str) => { text(str); nl(); };
+function btLog(msg){ const log=document.getElementById('btDebugLog'); if(!log)return; log.style.display='block'; const l=document.createElement('div'); l.textContent='['+new Date().toLocaleTimeString()+'] '+msg; log.appendChild(l); log.scrollTop=log.scrollHeight; }
 
-  // 58mm = 32 chars per line
-  const W = 32;
-  const pad  = (s, n) => String(s).substring(0, n).padEnd(n);
-  const rpad = (s, n) => String(s).substring(0, n).padStart(n);
-  const divider = () => line('-'.repeat(W));
+async function connectBTPrinter(){
+  if(!navigator.bluetooth){ showToast('Web Bluetooth not supported. Use Chrome/Edge.','warn'); return; }
+  const btn=document.getElementById('btBtn'); btn.textContent='🔄 Scanning...'; btn.disabled=true;
+  try{ btDevice=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:PRINTER_SERVICE_UUIDS}); }
+  catch(e){ resetPrinterBtn(); return; }
+  btn.textContent='🔄 Connecting...';
+  let server=null;
+  for(let i=1;i<=3;i++){ try{ if(i>1)await new Promise(r=>setTimeout(r,1200)); server=await btDevice.gatt.connect(); btLog('GATT connected attempt '+i); break; }catch(e){ btLog('GATT attempt '+i+' failed: '+e.message); if(i===3){ showToast('Cannot connect. Turn printer OFF/ON and retry.','warn'); resetPrinterBtn(); return; } } }
+  let allServices=[];
+  try{ allServices=await server.getPrimaryServices(); btLog('Found '+allServices.length+' services'); }catch(e){}
+  let service=null;
+  for(const uuid of PRINTER_SERVICE_UUIDS){ try{ service=await server.getPrimaryService(uuid); btLog('Service: '+uuid); break; }catch(e){} }
+  if(!service&&allServices.length>0){ service=allServices[0]; btLog('Using first service: '+service.uuid); }
+  if(!service){ showToast('No printer service found.','warn'); resetPrinterBtn(); return; }
+  let chars=[];
+  try{ chars=await service.getCharacteristics(); }catch(e){ for(const uuid of PRINTER_CHAR_UUIDS){ try{ const c=await service.getCharacteristic(uuid); chars.push(c); break; }catch(e2){} } }
+  btCharacteristic=null;
+  for(const tx of PRINTER_CHAR_UUIDS){ const f=chars.find(c=>c.uuid===tx); if(f&&(f.properties.write||f.properties.writeWithoutResponse)){ btCharacteristic=f; break; } }
+  if(!btCharacteristic) btCharacteristic=chars.find(c=>c.properties.write||c.properties.writeWithoutResponse);
+  if(!btCharacteristic){ showToast('No writable channel on printer.','warn'); resetPrinterBtn(); return; }
+  const name=btDevice.name||'Thermal Printer';
+  btn.textContent='✅ '+name; btn.classList.add('connected'); btn.disabled=false;
+  document.getElementById('printerStatusBar').style.display='block';
+  updateBtPrintHint(); showToast('✅ '+name+' connected!','success');
+  btDevice.addEventListener('gattserverdisconnected',()=>{ btCharacteristic=null; btDevice=null; resetPrinterBtn(); document.getElementById('printerStatusBar').style.display='none'; updateBtPrintHint(); showToast('Printer disconnected','warn'); });
+}
 
-  // Initialize printer
-  raw(ESC, 0x40);              // ESC @ — full reset
-  raw(ESC, 0x74, 0x00);       // Character code page: PC437
-  raw(GS,  0x61, 0x00);       // Disable ASB (status back)
+function resetPrinterBtn(){ const btn=document.getElementById('btBtn'); btn.textContent='🖨️ Connect Printer'; btn.classList.remove('connected'); btn.disabled=false; }
 
-  // Store name — center, double-height
-  raw(ESC, 0x61, 0x01);       // Center align
-  raw(ESC, 0x21, 0x10);       // Double height
-  line('Rajeshwari Medical');
-  raw(ESC, 0x21, 0x00);       // Normal size
-  line('& General Store');
-  nl();
-
-  // Bill info — left align
-  raw(ESC, 0x61, 0x00);
+function buildEscPos(bill){
+  const enc=new TextEncoder(); const chunks=[]; const ESC=0x1B,GS=0x1D,LF=0x0A;
+  const raw=(...b)=>chunks.push(new Uint8Array(b)); const text=s=>chunks.push(enc.encode(s)); const nl=()=>chunks.push(new Uint8Array([LF])); const line=s=>{text(s);nl();};
+  const W=32; const pad=(s,n)=>String(s).substring(0,n).padEnd(n); const rpad=(s,n)=>String(s).substring(0,n).padStart(n); const divider=()=>line('-'.repeat(W));
+  raw(ESC,0x40); raw(ESC,0x74,0x00); raw(GS,0x61,0x00);
+  raw(ESC,0x61,0x01); raw(ESC,0x21,0x10); line('Rajeshwari Medical'); raw(ESC,0x21,0x00); line('& General Store'); nl();
+  raw(ESC,0x61,0x00); divider(); line('Bill  : '+bill.billId); line('Date  : '+bill.date); line('Pt    : '+(bill.patient||'Walk-in').substring(0,22)); if(bill.doctor&&bill.doctor!=='—') line('Dr.   : '+bill.doctor.substring(0,23)); divider();
+  line(pad('Item',16)+pad('Qty',5)+rpad('Amt',11)); divider();
+  bill.items.forEach(item=>{ const name=item.name.substring(0,16); const qty=String(item.qty).padStart(4)+' '; const amount=('Rs'+(item.price*item.qty).toFixed(2)).padStart(11); if(item.name.length>16){ line(name); line(' '.repeat(16)+qty+amount); line('  '+item.name.substring(16,30)); }else{ line(name+qty+amount); } });
   divider();
-  line('Bill  : ' + bill.billId);
-  line('Date  : ' + bill.date);
-  line('Pt    : ' + (bill.patient || 'Walk-in').substring(0, 22));
-  if (bill.doctor && bill.doctor !== '—') {
-    line('Dr.   : ' + bill.doctor.substring(0, 23));
-  }
-  divider();
-
-  // Table header — 58mm layout: Name(16) Qty(4) Amt(12)
-  line(pad('Item', 16) + pad('Qty', 5) + rpad('Amt', 11));
-  divider();
-
-  bill.items.forEach(item => {
-    const name   = item.name.substring(0, 16);
-    const qty    = String(item.qty).padStart(4) + ' ';
-    const amount = ('Rs' + (item.price * item.qty).toFixed(2)).padStart(11);
-
-    // If name is long, wrap it
-    if (item.name.length > 16) {
-      line(name);
-      line(' '.repeat(16) + qty + amount);
-      // Print full name on second line
-      line('  ' + item.name.substring(16, 30));
-    } else {
-      line(name + qty + amount);
-    }
-  });
-
-  divider();
-
-  const sub      = bill.sub.toFixed(2);
-  const discount = (bill.discount != null ? bill.discount : bill.sub * 0.03).toFixed(2);
-  const total    = bill.total.toFixed(2);
-
-  line(pad('Subtotal:', W - 12) + ('Rs' + sub).padStart(12));
-  line(pad('Discount(3%):', W - 12) + ('-Rs' + discount).padStart(12));
-  divider();
-
-  // Total — bold / double height
-  raw(ESC, 0x21, 0x30);       // Bold + double height
-  line(pad('TOTAL:', W - 14)  + ('Rs' + total).padStart(14));
-  raw(ESC, 0x21, 0x00);       // Normal
-
-  divider();
-  raw(ESC, 0x61, 0x01);       // Center
-  line('By: ' + (bill.generatedBy || ''));
-  line('Thank you! Come again.');
-  nl();
-  nl();
-  nl();
-
-  // Cut paper (full cut)
-  raw(GS, 0x56, 0x00);        // GS V 0 — full cut
-
-  // Merge all chunks
-  const total_len = chunks.reduce((a, b) => a + b.length, 0);
-  const merged    = new Uint8Array(total_len);
-  let   offset    = 0;
-  chunks.forEach(c => { merged.set(c, offset); offset += c.length; });
-  return merged;
+  const sub=bill.sub.toFixed(2); const discount=(bill.discount!=null?bill.discount:bill.sub*0.03).toFixed(2); const total=bill.total.toFixed(2);
+  line(pad('Subtotal:',W-12)+('Rs'+sub).padStart(12)); line(pad('Discount(3%):',W-12)+('-Rs'+discount).padStart(12)); divider();
+  raw(ESC,0x21,0x30); line(pad('TOTAL:',W-14)+('Rs'+total).padStart(14)); raw(ESC,0x21,0x00);
+  divider(); raw(ESC,0x61,0x01); line('By: '+(bill.generatedBy||'')); line('Thank you! Come again.'); nl(); nl(); nl(); raw(GS,0x56,0x00);
+  const tlen=chunks.reduce((a,b)=>a+b.length,0); const merged=new Uint8Array(tlen); let off=0; chunks.forEach(c=>{merged.set(c,off);off+=c.length;}); return merged;
 }
 
-/* ═══════════════════════════════════════════
-   SEND TO PRINTER
-   58mm printers: max 100 bytes per chunk,
-   ~80ms gap between chunks for stability
-═══════════════════════════════════════════ */
-async function sendToPrinter(data) {
-  const CHUNK_SIZE = 100;  // Safe for most 58mm BT thermal printers
-  const DELAY_MS   = 80;   // Gap between chunks
-
-  btLog('Sending ' + data.length + ' bytes in ' + Math.ceil(data.length / CHUNK_SIZE) + ' chunks...');
-
-  for (let i = 0; i < data.length; i += CHUNK_SIZE) {
-    const slice = data.slice(i, i + CHUNK_SIZE);
-    try {
-      if (btCharacteristic.properties.writeWithoutResponse) {
-        await btCharacteristic.writeValueWithoutResponse(slice);
-      } else {
-        await btCharacteristic.writeValue(slice);
-      }
-    } catch(e) {
-      btLog('Write error at byte ' + i + ': ' + e.message);
-      throw e;
-    }
-    await new Promise(r => setTimeout(r, DELAY_MS));
-  }
-  btLog('All data sent successfully!');
+async function sendToPrinter(data){
+  const CS=100,DL=80; btLog('Sending '+data.length+' bytes...');
+  for(let i=0;i<data.length;i+=CS){ const sl=data.slice(i,i+CS); try{ if(btCharacteristic.properties.writeWithoutResponse) await btCharacteristic.writeValueWithoutResponse(sl); else await btCharacteristic.writeValue(sl); }catch(e){ btLog('Write error: '+e.message); throw e; } await new Promise(r=>setTimeout(r,DL)); }
+  btLog('All sent!');
 }
 
-/* ═══════════════════════════════════════════
-   PRINT ACTIONS
-═══════════════════════════════════════════ */
-function updateBtPrintHint() {
-  const btn  = document.getElementById('btPrintBtn');
-  const hint = document.getElementById('btPrintHint');
-  if (!btn || !hint) return;
-  if (btCharacteristic) {
-    btn.disabled = false;
-    btn.classList.add('connected');
-    btn.textContent = '📡 Bluetooth Print';
-    const name = btDevice && btDevice.name ? btDevice.name : 'Printer';
-    hint.innerHTML = '<span style="color:var(--green);font-weight:500">✅ ' + name + ' ready</span>';
-  } else {
-    btn.disabled = true;
-    btn.classList.remove('connected');
-    btn.textContent = '📡 Bluetooth Print';
-    hint.innerHTML = 'Not connected — <a href="#" onclick="event.preventDefault();connectBTPrinter();" style="color:var(--blue);font-weight:500">Connect Printer</a>';
-  }
+function updateBtPrintHint(){
+  const btn=document.getElementById('btPrintBtn'); const hint=document.getElementById('btPrintHint'); if(!btn||!hint)return;
+  if(btCharacteristic){ btn.disabled=false; btn.classList.add('connected'); hint.innerHTML='<span style="color:var(--green);font-weight:500">✅ '+(btDevice&&btDevice.name?btDevice.name:'Printer')+' ready</span>'; }
+  else{ btn.disabled=true; btn.classList.remove('connected'); hint.innerHTML='Not connected — <a href="#" onclick="event.preventDefault();connectBTPrinter();" style="color:var(--blue);font-weight:500">Connect Printer</a>'; }
 }
 
-async function doBTPrint() {
-  if (!btCharacteristic) {
-    showToast('Connect a Bluetooth printer first', 'warn');
-    return;
-  }
-  const bills = STORE.get('ms_bills') || [];
-  if (!bills.length) { showToast('No bill to print', 'warn'); return; }
-
-  const bill = bills[0];  // most recent bill
-  const btn = document.getElementById('btPrintBtn');
-  btn.textContent = '⏳ Printing...';
-  btn.disabled = true;
-
-  // Clear debug log for this print job
-  const log = document.getElementById('btDebugLog');
-  if (log) { log.innerHTML = ''; log.style.display = 'block'; }
-
-  try {
-    const data = buildEscPos(bill);
-    await sendToPrinter(data);
-    showToast('✅ Receipt sent to printer!', 'success');
-    btn.textContent = '✅ Printed!';
-    setTimeout(() => updateBtPrintHint(), 3000);
-  } catch(e) {
-    console.warn('BT print error:', e);
-    btLog('PRINT FAILED: ' + e.message);
-    showToast('Print failed: ' + (e.message || 'unknown error'), 'error');
-    // Reset connection state
-    btCharacteristic = null;
-    btDevice = null;
-    resetPrinterBtn();
-    document.getElementById('printerStatusBar').style.display = 'none';
-    updateBtPrintHint();
-  }
+async function doBTPrint(){
+  if(!btCharacteristic){ showToast('Connect a Bluetooth printer first','warn'); return; }
+  const bills=STORE.get('ms_bills')||[]; if(!bills.length){ showToast('No bill to print','warn'); return; }
+  const bill=bills[0]; const btn=document.getElementById('btPrintBtn'); btn.textContent='⏳ Printing...'; btn.disabled=true;
+  const log=document.getElementById('btDebugLog'); if(log){log.innerHTML='';log.style.display='block';}
+  try{ const data=buildEscPos(bill); await sendToPrinter(data); showToast('✅ Receipt sent to printer!','success'); btn.textContent='✅ Printed!'; setTimeout(()=>updateBtPrintHint(),3000); }
+  catch(e){ btLog('PRINT FAILED: '+e.message); showToast('Print failed: '+(e.message||'unknown error'),'error'); btCharacteristic=null; btDevice=null; resetPrinterBtn(); document.getElementById('printerStatusBar').style.display='none'; updateBtPrintHint(); }
 }
 
-function doBrowserPrint() {
-  setTimeout(() => window.print(), 150);
+function doBrowserPrint(){ setTimeout(()=>window.print(),150); }
+
+let _toastTimer=null;
+function showToast(msg,type){
+  const colors={success:'#1a7a4a',error:'#c0392b',warn:'#e67e22'}; const bg=colors[type]||colors.success;
+  let t=document.getElementById('toastMsg');
+  if(!t){ t=document.createElement('div'); t.id='toastMsg'; t.style.cssText='position:fixed;bottom:28px;left:50%;transform:translateX(-50%);color:white;padding:12px 24px;border-radius:10px;font-size:14px;font-weight:500;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.2);transition:opacity 0.4s;opacity:0'; document.body.appendChild(t); }
+  if(_toastTimer)clearTimeout(_toastTimer);
+  t.style.background=bg; t.textContent=msg; t.style.opacity='1';
+  _toastTimer=setTimeout(()=>{ t.style.opacity='0'; },3500);
 }
 
-/* Toast notification */
-let _toastTimer = null;
-function showToast(msg, type) {
-  const colors = { success:'#1a7a4a', error:'#c0392b', warn:'#e67e22' };
-  const bg = colors[type] || colors.success;
-  let t = document.getElementById('toastMsg');
-  if (!t) {
-    t = document.createElement('div');
-    t.id = 'toastMsg';
-    t.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%);color:white;padding:12px 24px;border-radius:10px;font-size:14px;font-weight:500;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.2);transition:opacity 0.4s;opacity:0';
-    document.body.appendChild(t);
-  }
-  if (_toastTimer) clearTimeout(_toastTimer);
-  t.style.background = bg;
-  t.textContent = msg;
-  t.style.opacity = '1';
-  _toastTimer = setTimeout(() => { t.style.opacity = '0'; }, 3500);
-}
-
-/* ═══════════════════════════════════════════
+/* ═══════════════════════════════════════════════════
    AUTH
-═══════════════════════════════════════════ */
+═══════════════════════════════════════════════════ */
 function doLogin(){
-  const u = document.getElementById('loginUser').value.trim();
-  const p = document.getElementById('loginPass').value;
-  const users = STORE.get('ms_users') || {};
-  const roles = STORE.get('ms_roles') || {};
-  if(users[u] && users[u] === p){
-    currentUser = u;
-    document.getElementById('currentUserLabel').textContent = u + ' (' + (roles[u]||'staff') + ')';
-    const isAdmin = (roles[u]||'staff') === 'admin';
-    document.getElementById('adminTab').style.display = isAdmin ? 'block' : 'none';
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('appScreen').style.display = 'block';
-    renderInventory(); renderBillDropdown(); renderHistory();
-    document.getElementById('loginUser').value='';
-    document.getElementById('loginPass').value='';
-    document.getElementById('loginError').style.display='none';
-  } else {
-    document.getElementById('loginError').style.display='block';
-  }
+  const u=document.getElementById('loginUser').value.trim(); const p=document.getElementById('loginPass').value;
+  const users=STORE.get('ms_users')||{}; const roles=STORE.get('ms_roles')||{};
+  if(users[u]&&users[u]===p){
+    currentUser=u;
+    document.getElementById('currentUserLabel').textContent=u+' ('+(roles[u]||'staff')+')';
+    const isAdmin=(roles[u]||'staff')==='admin';
+    document.getElementById('adminTab').style.display=isAdmin?'block':'none';
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('appScreen').style.display='block';
+    renderInventory(); renderHistory(); renderShortageBadge();
+    // Save or clear remembered credentials
+    if(document.getElementById('rememberMe').checked){
+      localStorage.setItem('ms_remember_user', u);
+      localStorage.setItem('ms_remember_pass', p);
+    } else {
+      localStorage.removeItem('ms_remember_user');
+      localStorage.removeItem('ms_remember_pass');
+    }
+    document.getElementById('loginUser').value=''; document.getElementById('loginPass').value=''; document.getElementById('loginError').style.display='none';
+  }else{ document.getElementById('loginError').style.display='block'; }
 }
 
 function doLogout(){
-  currentUser = null; cart = [];
-  btDevice = null; btCharacteristic = null;
-  resetPrinterBtn();
-  document.getElementById('printerStatusBar').style.display = 'none';
+  currentUser=null; cart=[]; selectedBillMed=null;
+  btDevice=null; btCharacteristic=null; resetPrinterBtn();
+  document.getElementById('printerStatusBar').style.display='none';
   document.getElementById('appScreen').style.display='none';
   document.getElementById('loginScreen').style.display='flex';
   document.querySelectorAll('.nav-tab').forEach((t,i)=>t.classList.toggle('active',i===0));
   document.querySelectorAll('.page').forEach((p,i)=>p.classList.toggle('active',i===0));
 }
 
-/* ═══════════════════════════════════════════
+/* ═══════════════════════════════════════════════════
    TABS
-═══════════════════════════════════════════ */
-function switchTab(tab, el){
+═══════════════════════════════════════════════════ */
+function switchTab(tab,el){
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+tab).classList.add('active');
-  if(tab==='billing') renderBillDropdown();
   if(tab==='history') renderHistory();
-  if(tab==='admin')   renderAdminPanel();
+  if(tab==='shortage') renderShortage();
+  if(tab==='admin') renderAdminPanel();
+  if(tab==='billing'){ document.getElementById('billSearch').value=''; selectedBillMed=null; document.getElementById('selectedMedInfo').style.display='none'; }
 }
 
-/* ═══════════════════════════════════════════
+/* ═══════════════════════════════════════════════════
    ADMIN
-═══════════════════════════════════════════ */
+═══════════════════════════════════════════════════ */
 function renderAdminPanel(){
-  const users = STORE.get('ms_users')||{};
-  const roles = STORE.get('ms_roles')||{};
-  const names = Object.keys(users);
-  const admins = names.filter(u=>(roles[u]||'staff')==='admin');
-  const staff  = names.filter(u=>(roles[u]||'staff')==='staff');
-  document.getElementById('aStatUsers').textContent  = names.length;
-  document.getElementById('aStatAdmins').textContent = admins.length;
-  document.getElementById('aStatStaff').textContent  = staff.length;
-  const tbody = document.getElementById('userList');
-  tbody.innerHTML = '';
+  const users=STORE.get('ms_users')||{}; const roles=STORE.get('ms_roles')||{};
+  const names=Object.keys(users); const admins=names.filter(u=>(roles[u]||'staff')==='admin'); const staff=names.filter(u=>(roles[u]||'staff')==='staff');
+  document.getElementById('aStatUsers').textContent=names.length; document.getElementById('aStatAdmins').textContent=admins.length; document.getElementById('aStatStaff').textContent=staff.length;
+  const tbody=document.getElementById('userList'); tbody.innerHTML='';
   names.forEach((u,i)=>{
-    const role = roles[u]||'staff';
-    const isSelf = u===currentUser;
-    const isOnlyAdmin = role==='admin' && admins.length===1;
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td style="color:var(--muted);font-size:12px">${i+1}</td>
-      <td style="font-weight:500">${u} ${isSelf?'<span style="background:var(--green-light);color:var(--green);font-size:11px;padding:2px 7px;border-radius:20px">you</span>':''}</td>
+    const role=roles[u]||'staff'; const isSelf=u===currentUser; const isOnlyAdmin=role==='admin'&&admins.length===1;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="color:var(--muted);font-size:12px">${i+1}</td><td style="font-weight:500">${u} ${isSelf?'<span style="background:var(--green-light);color:var(--green);font-size:11px;padding:2px 7px;border-radius:20px">you</span>':''}</td>
       <td><span class="status-pill ${role==='admin'?'status-safe':'status-warning'}">${role}</span></td>
-      <td>
-        <div style="display:flex;gap:6px;align-items:center">
-          <input type="password" placeholder="New password" id="pw_${u}" style="padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;width:150px;outline:none;font-family:inherit" />
-          <button class="btn-sm btn-blue" onclick="changePassword('${u}')">Save</button>
-        </div>
-      </td>
-      <td>
-        <select id="role_${u}" style="padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;outline:none" onchange="changeRole('${u}',this.value)" ${isOnlyAdmin?'disabled title="Cannot demote the only admin"':''}>
-          <option value="staff" ${role==='staff'?'selected':''}>Staff</option>
-          <option value="admin" ${role==='admin'?'selected':''}>Admin</option>
-        </select>
-      </td>
+      <td><div style="display:flex;gap:6px;align-items:center"><input type="password" placeholder="New password" id="pw_${u}" style="padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;width:150px;outline:none;font-family:inherit"/><button class="btn-sm btn-blue" onclick="changePassword('${u}')">Save</button></div></td>
+      <td><select id="role_${u}" style="padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;outline:none" onchange="changeRole('${u}',this.value)" ${isOnlyAdmin?'disabled':''}>
+        <option value="staff" ${role==='staff'?'selected':''}>Staff</option><option value="admin" ${role==='admin'?'selected':''}>Admin</option></select></td>
       <td><button class="btn-sm btn-danger" onclick="deleteUser('${u}')" ${isSelf||isOnlyAdmin?'disabled style="opacity:0.4;cursor:not-allowed"':''}>Delete</button></td>`;
     tbody.appendChild(tr);
   });
@@ -893,325 +699,429 @@ function renderAdminPanel(){
 }
 
 function adminCreateUser(){
-  const u = document.getElementById('newUserName').value.trim();
-  const p = document.getElementById('newUserPass').value;
-  const role = document.getElementById('newUserRole').value;
-  const msg = document.getElementById('adminCreateMsg');
+  const u=document.getElementById('newUserName').value.trim(); const p=document.getElementById('newUserPass').value; const role=document.getElementById('newUserRole').value;
+  const msg=document.getElementById('adminCreateMsg');
   if(!u||!p){ msg.style.cssText='display:block;color:var(--red);background:var(--red-light);padding:8px 12px;border-radius:6px'; msg.textContent='Please fill username and password'; return; }
-  let users = STORE.get('ms_users')||{};
+  let users=STORE.get('ms_users')||{};
   if(users[u]){ msg.style.cssText='display:block;color:var(--red);background:var(--red-light);padding:8px 12px;border-radius:6px'; msg.textContent='Username already exists'; return; }
   users[u]=p; STORE.set('ms_users',users);
-  let roles = STORE.get('ms_roles')||{};
-  roles[u]=role; STORE.set('ms_roles',roles);
-  document.getElementById('newUserName').value='';
-  document.getElementById('newUserPass').value='';
-  msg.style.cssText='display:block;color:var(--green);background:var(--green-light);padding:8px 12px;border-radius:6px';
-  msg.textContent=`User "${u}" created as ${role}`;
-  setTimeout(()=>msg.style.display='none',3000);
-  renderAdminPanel();
+  let roles=STORE.get('ms_roles')||{}; roles[u]=role; STORE.set('ms_roles',roles);
+  document.getElementById('newUserName').value=''; document.getElementById('newUserPass').value='';
+  msg.style.cssText='display:block;color:var(--green);background:var(--green-light);padding:8px 12px;border-radius:6px'; msg.textContent=`User "${u}" created as ${role}`;
+  setTimeout(()=>msg.style.display='none',3000); renderAdminPanel();
 }
 
-function changePassword(u){
-  const pw = document.getElementById('pw_'+u).value;
-  if(!pw){ showToast('Enter a new password', 'warn'); return; }
-  if(pw.length<4){ showToast('Password must be at least 4 characters', 'warn'); return; }
-  let users = STORE.get('ms_users')||{};
-  users[u]=pw; STORE.set('ms_users',users);
-  document.getElementById('pw_'+u).value='';
-  showToast(`Password updated for "${u}"`, 'success');
-}
-
-function changeRole(u, newRole){
-  const roles = STORE.get('ms_roles')||{};
-  const admins = Object.keys(roles).filter(k=>roles[k]==='admin');
-  if(roles[u]==='admin' && admins.length===1 && newRole==='staff'){
-    showToast('Cannot demote the only admin account.', 'warn');
-    document.getElementById('role_'+u).value='admin'; return;
-  }
-  roles[u]=newRole; STORE.set('ms_roles',roles);
-  renderAdminPanel();
-}
-
-function deleteUser(u){
-  if(!confirm(`Delete user "${u}"? This cannot be undone.`)) return;
-  const roles = STORE.get('ms_roles')||{};
-  const admins = Object.keys(roles).filter(k=>roles[k]==='admin');
-  if(roles[u]==='admin' && admins.length===1){ showToast('Cannot delete the only admin.', 'warn'); return; }
-  let users = STORE.get('ms_users')||{};
-  delete users[u]; STORE.set('ms_users',users);
-  delete roles[u]; STORE.set('ms_roles',roles);
-  renderAdminPanel();
-}
+function changePassword(u){ const pw=document.getElementById('pw_'+u).value; if(!pw){ showToast('Enter a new password','warn'); return; } if(pw.length<4){ showToast('Password must be at least 4 chars','warn'); return; } let users=STORE.get('ms_users')||{}; users[u]=pw; STORE.set('ms_users',users); document.getElementById('pw_'+u).value=''; showToast(`Password updated for "${u}"`,'success'); }
+function changeRole(u,r){ const roles=STORE.get('ms_roles')||{}; const admins=Object.keys(roles).filter(k=>roles[k]==='admin'); if(roles[u]==='admin'&&admins.length===1&&r==='staff'){ showToast('Cannot demote the only admin.','warn'); document.getElementById('role_'+u).value='admin'; return; } roles[u]=r; STORE.set('ms_roles',roles); renderAdminPanel(); }
+function deleteUser(u){ if(!confirm(`Delete user "${u}"?`))return; const roles=STORE.get('ms_roles')||{}; const admins=Object.keys(roles).filter(k=>roles[k]==='admin'); if(roles[u]==='admin'&&admins.length===1){ showToast('Cannot delete the only admin.','warn'); return; } let users=STORE.get('ms_users')||{}; delete users[u]; STORE.set('ms_users',users); delete roles[u]; STORE.set('ms_roles',roles); renderAdminPanel(); }
 
 function renderStaffActivity(){
-  const meds  = STORE.get('ms_medicines')||[];
-  const bills = STORE.get('ms_bills')||[];
-  const users = STORE.get('ms_users')||{};
-  const roles = STORE.get('ms_roles')||{};
-  const userFilter = document.getElementById('activityUserFilter').value;
-  const typeFilter = document.getElementById('activityTypeFilter').value;
-  const sel = document.getElementById('activityUserFilter');
-  const prev = sel.value;
-  sel.innerHTML = '<option value="all">All Staff</option>';
-  Object.keys(users).forEach(u=>{
-    const opt = document.createElement('option');
-    opt.value=u; opt.textContent=u+' ('+(roles[u]||'staff')+')';
-    sel.appendChild(opt);
-  });
-  sel.value=prev;
-  let activities = [];
-  if(typeFilter!=='bill') meds.forEach(m=>{ activities.push({ type:'medicine', user:m.addedBy||'Unknown', details:m.name, extra:'₹'+parseFloat(m.price).toFixed(2), date:m.addedOn||'—', ts:m.id||0 }); });
-  if(typeFilter!=='medicine') bills.forEach(b=>{ activities.push({ type:'bill', user:b.generatedBy||'Unknown', details:b.billId+' — '+b.patient+' ('+b.items.length+' item'+(b.items.length>1?'s':'')+')', extra:'₹'+b.total.toFixed(2), date:b.date, ts:parseInt(b.billId.replace('RX-',''))||0 }); });
-  if(userFilter!=='all') activities = activities.filter(a=>a.user===userFilter);
+  const meds=STORE.get('ms_medicines')||[]; const bills=STORE.get('ms_bills')||[]; const users=STORE.get('ms_users')||{}; const roles=STORE.get('ms_roles')||{};
+  const userFilter=document.getElementById('activityUserFilter').value; const typeFilter=document.getElementById('activityTypeFilter').value;
+  const sel=document.getElementById('activityUserFilter'); const prev=sel.value;
+  sel.innerHTML='<option value="all">All Staff</option>';
+  Object.keys(users).forEach(u=>{ const opt=document.createElement('option'); opt.value=u; opt.textContent=u+' ('+(roles[u]||'staff')+')'; sel.appendChild(opt); }); sel.value=prev;
+  let activities=[];
+  if(typeFilter!=='bill') meds.forEach(m=>activities.push({type:'medicine',user:m.addedBy||'Unknown',details:m.name,extra:'₹'+parseFloat(m.price).toFixed(2),date:m.addedOn||'—',ts:m.id||0}));
+  if(typeFilter!=='medicine') bills.forEach(b=>activities.push({type:'bill',user:b.generatedBy||'Unknown',details:b.billId+' — '+b.patient+' ('+b.items.length+' item'+(b.items.length>1?'s':'')+')',extra:'₹'+b.total.toFixed(2),date:b.date,ts:parseInt(b.billId.replace('RX-',''))||0}));
+  if(userFilter!=='all') activities=activities.filter(a=>a.user===userFilter);
   activities.sort((a,b)=>b.ts-a.ts);
-  const summaryMap = {};
+  const summaryMap={};
   meds.forEach(m=>{ const u=m.addedBy||'Unknown'; if(!summaryMap[u]) summaryMap[u]={meds:0,bills:0,revenue:0}; summaryMap[u].meds++; });
   bills.forEach(b=>{ const u=b.generatedBy||'Unknown'; if(!summaryMap[u]) summaryMap[u]={meds:0,bills:0,revenue:0}; summaryMap[u].bills++; summaryMap[u].revenue+=b.total; });
-  const summaryDiv = document.getElementById('staffSummaryCards');
-  const filteredUsers = userFilter==='all' ? Object.keys(summaryMap) : [userFilter];
-  summaryDiv.innerHTML = filteredUsers.length===0 ? '' : filteredUsers.map(u=>{
-    const s=summaryMap[u]||{meds:0,bills:0,revenue:0};
-    const role=roles[u]||'staff';
-    return `<div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px 16px">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-        <div style="width:32px;height:32px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;color:var(--green)">${u[0].toUpperCase()}</div>
-        <div><div style="font-weight:600;font-size:14px">${u}</div><div style="font-size:11px;color:var(--muted)">${role}</div></div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px">
-        <div style="background:white;border-radius:6px;padding:6px 8px"><div style="color:var(--muted)">Medicines</div><div style="font-weight:600;color:var(--green)">${s.meds}</div></div>
-        <div style="background:white;border-radius:6px;padding:6px 8px"><div style="color:var(--muted)">Bills</div><div style="font-weight:600;color:var(--blue)">${s.bills}</div></div>
-        <div style="background:white;border-radius:6px;padding:6px 8px;grid-column:span 2"><div style="color:var(--muted)">Revenue Generated</div><div style="font-weight:600;color:var(--amber)">₹${s.revenue.toFixed(2)}</div></div>
-      </div>
-    </div>`;
-  }).join('');
-  const tbody = document.getElementById('activityList');
-  tbody.innerHTML='';
-  document.getElementById('activityEmpty').style.display = activities.length ? 'none' : 'block';
-  activities.forEach(a=>{
-    const isMed = a.type==='medicine';
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td><span class="status-pill ${isMed?'status-safe':'status-warning'}">${isMed?'💊 Medicine':'🧾 Bill'}</span></td>
-      <td><div style="display:flex;align-items:center;gap:8px">
-        <div style="width:28px;height:28px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--green)">${(a.user||'?')[0].toUpperCase()}</div>
-        <span style="font-weight:500">${a.user}</span></div></td>
-      <td style="color:var(--text)">${a.details}</td>
-      <td style="font-weight:600;color:${isMed?'var(--muted)':'var(--green)'}">${a.extra}</td>
-      <td style="color:var(--muted);font-size:13px">${a.date}</td>`;
-    tbody.appendChild(tr);
-  });
+  const sd=document.getElementById('staffSummaryCards'); const fu=userFilter==='all'?Object.keys(summaryMap):[userFilter];
+  sd.innerHTML=fu.length===0?'':fu.map(u=>{ const s=summaryMap[u]||{meds:0,bills:0,revenue:0}; const role=roles[u]||'staff'; return `<div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px 16px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><div style="width:32px;height:32px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;color:var(--green)">${u[0].toUpperCase()}</div><div><div style="font-weight:600;font-size:14px">${u}</div><div style="font-size:11px;color:var(--muted)">${role}</div></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px"><div style="background:white;border-radius:6px;padding:6px 8px"><div style="color:var(--muted)">Medicines</div><div style="font-weight:600;color:var(--green)">${s.meds}</div></div><div style="background:white;border-radius:6px;padding:6px 8px"><div style="color:var(--muted)">Bills</div><div style="font-weight:600;color:var(--blue)">${s.bills}</div></div><div style="background:white;border-radius:6px;padding:6px 8px;grid-column:span 2"><div style="color:var(--muted)">Revenue</div><div style="font-weight:600;color:var(--amber)">₹${s.revenue.toFixed(2)}</div></div></div></div>`; }).join('');
+  const tbody=document.getElementById('activityList'); tbody.innerHTML='';
+  document.getElementById('activityEmpty').style.display=activities.length?'none':'block';
+  activities.forEach(a=>{ const isMed=a.type==='medicine'; const tr=document.createElement('tr'); tr.innerHTML=`<td><span class="status-pill ${isMed?'status-safe':'status-warning'}">${isMed?'💊 Medicine':'🧾 Bill'}</span></td><td><div style="display:flex;align-items:center;gap:8px"><div style="width:28px;height:28px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--green)">${(a.user||'?')[0].toUpperCase()}</div><span style="font-weight:500">${a.user}</span></div></td><td>${a.details}</td><td style="font-weight:600;color:${isMed?'var(--muted)':'var(--green)'}">${a.extra}</td><td style="color:var(--muted);font-size:13px">${a.date}</td>`; tbody.appendChild(tr); });
 }
 
-/* ═══════════════════════════════════════════
+/* ═══════════════════════════════════════════════════
    INVENTORY
-═══════════════════════════════════════════ */
+═══════════════════════════════════════════════════ */
 function getMeds(){ return STORE.get('ms_medicines')||[]; }
 function saveMeds(m){ STORE.set('ms_medicines',m); }
 
-function getStatus(expiry){
-  const today = new Date(); today.setHours(0,0,0,0);
-  const exp   = new Date(expiry);
-  const days  = Math.ceil((exp-today)/(1000*60*60*24));
-  if(days < 0)    return { text:'Expired',                    cls:'status-expired', key:'expired'  };
-  if(days <= 180) return { text:'Expiring Soon ('+days+'d)',  cls:'status-warning', key:'warning'  };
-  if(days <= 365) return { text:'~'+(Math.ceil(days/30))+'mo left', cls:'status-year', key:'year' };
-  return               { text:'Good',                         cls:'status-safe',    key:'safe'     };
+function getExpiryStatus(expiry){
+  const today=new Date(); today.setHours(0,0,0,0); const exp=new Date(expiry); const days=Math.ceil((exp-today)/(1000*60*60*24));
+  if(days<0)    return {text:'Expired',                   cls:'status-expired',key:'expired'};
+  if(days<=180) return {text:'Expiring ('+days+'d)',       cls:'status-warning',key:'warning'};
+  if(days<=365) return {text:'~'+Math.ceil(days/30)+'mo', cls:'status-year',   key:'year'};
+  return             {text:'Good',                        cls:'status-safe',   key:'safe'};
 }
 
 function addMedicine(){
-  const name   = document.getElementById('medName').value.trim();
-  const expiry = document.getElementById('expiryDate').value;
-  const price  = parseFloat(document.getElementById('medPrice').value);
-  if(!name||!expiry||isNaN(price)||price<0){ showToast('Please fill all fields correctly', 'warn'); return; }
-  const meds = getMeds();
-  meds.push({ id:Date.now(), name, expiry, price, addedBy:currentUser, addedOn:new Date().toLocaleDateString('en-IN') });
+  const name=document.getElementById('medName').value.trim();
+  const expiry=document.getElementById('expiryDate').value;
+  const type=document.getElementById('medType').value;
+  const qty=document.getElementById('medQty').value;
+  const price=parseFloat(document.getElementById('medPrice').value);
+  if(!name||!expiry||isNaN(price)||price<0){ showToast('Please fill all fields correctly','warn'); return; }
+  const meds=getMeds();
+  meds.push({id:Date.now(),name,expiry,type,qty:qty!==''?parseInt(qty):null,price,addedBy:currentUser,addedOn:new Date().toLocaleDateString('en-IN')});
   saveMeds(meds);
-  document.getElementById('medName').value='';
-  document.getElementById('expiryDate').value='';
-  document.getElementById('medPrice').value='';
-  renderInventory();
+  document.getElementById('medName').value=''; document.getElementById('expiryDate').value=''; document.getElementById('medQty').value=''; document.getElementById('medPrice').value='';
+  renderInventory(); renderShortageBadge(); showToast('Medicine added!','success');
 }
 
 function deleteMedicine(id){
-  if(!confirm('Remove this medicine from stock?')) return;
+  if(!confirm('Remove this medicine from stock?'))return;
   saveMeds(getMeds().filter(m=>m.id!==id));
-  renderInventory();
+  renderInventory(); renderShortageBadge();
+}
+
+function openEditModal(id){
+  const med=getMeds().find(m=>m.id===id); if(!med)return;
+  document.getElementById('editMedId').value=id;
+  document.getElementById('editName').value=med.name;
+  document.getElementById('editType').value=med.type||'tablet';
+  document.getElementById('editExpiry').value=med.expiry;
+  document.getElementById('editQtyCurrent').value=med.qty!==null&&med.qty!==undefined?med.qty:'Not Set';
+  document.getElementById('editQtyAdd').value='';
+  document.getElementById('editQtySet').value='';
+  document.getElementById('editPrice').value=med.price;
+  document.getElementById('editModal').classList.add('open');
+}
+
+function closeEditModal(){ document.getElementById('editModal').classList.remove('open'); }
+
+function saveEditMedicine(){
+  const id=parseInt(document.getElementById('editMedId').value);
+  const meds=getMeds(); const idx=meds.findIndex(m=>m.id===id); if(idx===-1)return;
+  const name=document.getElementById('editName').value.trim();
+  const type=document.getElementById('editType').value;
+  const expiry=document.getElementById('editExpiry').value;
+  const qtyAdd=document.getElementById('editQtyAdd').value;
+  const qtySet=document.getElementById('editQtySet').value;
+  const price=parseFloat(document.getElementById('editPrice').value);
+  if(!name||!expiry||isNaN(price)||price<0){ showToast('Please fill all required fields','warn'); return; }
+  let newQty=meds[idx].qty;
+  if(qtySet!=='') newQty=parseInt(qtySet);
+  else if(qtyAdd!=='') newQty=(newQty||0)+parseInt(qtyAdd);
+  meds[idx]={...meds[idx],name,type,expiry,qty:newQty,price};
+  saveMeds(meds); closeEditModal(); renderInventory(); renderShortageBadge(); showToast('Medicine updated!','success');
+}
+
+function fuzzyMatch(query, target){
+  const q=query.toLowerCase().trim(); const t=target.toLowerCase();
+  if(!q)return 1;
+  if(t.includes(q))return 1;
+  const words=t.split(/\s+/);
+  for(const w of words){ if(w.startsWith(q))return 0.9; }
+  let qi=0;
+  for(let i=0;i<t.length&&qi<q.length;i++){ if(t[i]===q[qi])qi++; }
+  return qi===q.length?0.5:0;
+}
+
+function highlightMatch(text, query){
+  if(!query)return text;
+  const idx=text.toLowerCase().indexOf(query.toLowerCase());
+  if(idx===-1)return text;
+  return text.substring(0,idx)+'<span class="ac-highlight">'+text.substring(idx,idx+query.length)+'</span>'+text.substring(idx+query.length);
 }
 
 function renderInventory(){
-  const meds   = getMeds();
-  const search = (document.getElementById('searchInput')?.value||'').toLowerCase();
-  const filter = document.getElementById('filterStatus')?.value||'all';
-  const tbody  = document.getElementById('medList');
-  tbody.innerHTML='';
-  let expired=0, warning=0, yearCount=0, good=0;
-  meds.forEach(m=>{ const s=getStatus(m.expiry); if(s.key==='expired') expired++; else if(s.key==='warning') warning++; else if(s.key==='year') yearCount++; else good++; });
-  document.getElementById('statTotal').textContent   = meds.length;
-  document.getElementById('statExpired').textContent = expired;
-  document.getElementById('statWarning').textContent = warning;
-  document.getElementById('statYear').textContent    = yearCount;
-  document.getElementById('statGood').textContent    = good;
-  const filtered = meds.filter(m=>{ const s = getStatus(m.expiry); return m.name.toLowerCase().includes(search) && (filter==='all'||s.key===filter); });
-  document.getElementById('invEmpty').style.display = filtered.length ? 'none' : 'block';
+  const meds=getMeds();
+  const search=(document.getElementById('searchInput')?.value||'').toLowerCase().trim();
+  const filterStatus=document.getElementById('filterStatus')?.value||'all';
+  const filterType=document.getElementById('filterType')?.value||'all';
+  const filterStock=document.getElementById('filterStock')?.value||'all';
+  const tbody=document.getElementById('medList'); tbody.innerHTML='';
+  let expired=0,warning=0,good=0,low=0;
+  meds.forEach(m=>{ const s=getExpiryStatus(m.expiry); if(s.key==='expired')expired++; else if(s.key==='warning')warning++; else good++; const sl=getStockLevel(m.type||'tablet',m.qty); if(sl.key==='danger'||sl.key==='ok')low++; });
+  document.getElementById('statTotal').textContent=meds.length;
+  document.getElementById('statExpired').textContent=expired;
+  document.getElementById('statWarning').textContent=warning;
+  document.getElementById('statLow').textContent=low;
+  document.getElementById('statGood').textContent=good;
+
+  let filtered=meds.filter(m=>{
+    const es=getExpiryStatus(m.expiry); const sl=getStockLevel(m.type||'tablet',m.qty);
+    if(filterStatus!=='all'&&es.key!==filterStatus)return false;
+    if(filterType!=='all'&&(m.type||'tablet')!==filterType)return false;
+    if(filterStock!=='all'&&sl.key!==filterStock)return false;
+    if(search){ const score=Math.max(fuzzyMatch(search,m.name),fuzzyMatch(search,m.type||''),fuzzyMatch(search,m.expiry||'')); return score>0; }
+    return true;
+  });
+
+  if(search){ filtered.sort((a,b)=>{ const sa=Math.max(fuzzyMatch(search,a.name),fuzzyMatch(search,a.type||'')); const sb=Math.max(fuzzyMatch(search,b.name),fuzzyMatch(search,b.type||'')); return sb-sa; }); }
+
+  document.getElementById('invEmpty').style.display=filtered.length?'none':'block';
   filtered.forEach((m,i)=>{
-    const s = getStatus(m.expiry);
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
+    const es=getExpiryStatus(m.expiry); const sl=getStockLevel(m.type||'tablet',m.qty);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
       <td style="color:var(--muted);font-size:12px">${i+1}</td>
-      <td style="font-weight:500">${m.name}</td>
+      <td style="font-weight:500">${search?highlightMatch(m.name,search):m.name}</td>
+      <td><span class="status-pill ${typeCls(m.type||'other')}">${typeLabel(m.type||'other')}</span></td>
       <td>${m.expiry}</td>
+      <td style="font-weight:600">${m.qty!==null&&m.qty!==undefined?m.qty:'—'}</td>
+      <td><span class="qty-pill ${sl.cls}">${sl.icon} ${sl.label}</span></td>
       <td>₹${parseFloat(m.price).toFixed(2)}</td>
-      <td><span class="status-pill ${s.cls}">${s.text}</span></td>
-      <td><button class="btn-sm btn-danger" onclick="deleteMedicine(${m.id})">Remove</button></td>`;
+      <td><span class="status-pill ${es.cls}">${es.text}</span></td>
+      <td style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn-sm btn-amber" onclick="openEditModal(${m.id})">✏️ Edit/Restock</button>
+        <button class="btn-sm btn-danger" onclick="deleteMedicine(${m.id})">Remove</button>
+      </td>`;
     tbody.appendChild(tr);
   });
 }
 
-/* ═══════════════════════════════════════════
-   BILLING
-═══════════════════════════════════════════ */
-function renderBillDropdown(){
-  const sel  = document.getElementById('billMedSelect');
-  const meds = getMeds().filter(m=>getStatus(m.expiry).key!=='expired');
-  sel.innerHTML = '<option value="">-- Choose medicine --</option>';
-  meds.forEach(m=>{ const opt = document.createElement('option'); opt.value = m.id; opt.textContent = `${m.name} — ₹${parseFloat(m.price).toFixed(2)}`; sel.appendChild(opt); });
+/* ═══════════════════════════════════════════════════
+   SHORTAGE PAGE
+═══════════════════════════════════════════════════ */
+function renderShortageBadge(){
+  const meds=getMeds();
+  const count=meds.filter(m=>{ const sl=getStockLevel(m.type||'tablet',m.qty); return sl.key==='danger'||sl.key==='ok'; }).length;
+  const badge=document.getElementById('shortageBadge');
+  if(count>0){ badge.textContent=count; badge.style.display='inline-flex'; }
+  else{ badge.style.display='none'; }
 }
 
+function renderShortage(){
+  const meds=getMeds();
+  const dangerItems=meds.filter(m=>getStockLevel(m.type||'tablet',m.qty).key==='danger');
+  const okItems=meds.filter(m=>getStockLevel(m.type||'tablet',m.qty).key==='ok');
+  const total=dangerItems.length+okItems.length;
+  document.getElementById('sStatTotal').textContent=total;
+  document.getElementById('sStatDanger').textContent=dangerItems.length;
+  document.getElementById('sStatOk').textContent=okItems.length;
+  let html='';
+  if(total===0){
+    html=`<div class="card"><div class="empty-state"><div class="icon">✅</div><p style="color:var(--green);font-weight:500">All medicines are well stocked!</p></div></div>`;
+  } else {
+    const types=['tablet','syrup','injection','other'];
+    types.forEach(type=>{
+      const danger=dangerItems.filter(m=>(m.type||'other')===type);
+      const ok=okItems.filter(m=>(m.type||'other')===type);
+      if(danger.length===0&&ok.length===0)return;
+      const typeIcons={tablet:'💊',syrup:'🍶',injection:'💉',other:'📦'};
+      const typeNames={tablet:'Tablets',syrup:'Syrups',injection:'Injections',other:'Others'};
+      const thresholds=getStockThresholds(type);
+      html+=`<div class="card shortage-section"><div class="shortage-section-title">${typeIcons[type]} ${typeNames[type]}<span style="font-size:12px;font-weight:400;color:var(--muted)">Good: ≥${thresholds.good} | Low: ${thresholds.ok}–${thresholds.good-1} | Danger: &lt;${thresholds.ok}</span></div>`;
+      if(danger.length>0){
+        html+=`<div style="margin-bottom:14px"><div style="font-size:13px;font-weight:600;color:var(--red);margin-bottom:8px;display:flex;align-items:center;gap:6px">🔴 Critical / Danger (${danger.length})</div>`;
+        danger.forEach(m=>{ html+=`<div class="shortage-card danger"><div class="shortage-icon">${typeIcons[type]}</div><div class="shortage-info"><div class="shortage-name">${m.name}</div><div class="shortage-meta">Expiry: ${m.expiry} · Added by: ${m.addedBy||'—'}</div></div><div class="shortage-qty"><div class="shortage-qty-val">${m.qty!==null&&m.qty!==undefined?m.qty:0}</div><div class="shortage-qty-label">units left</div></div><button class="btn-sm btn-amber" style="margin-left:10px" onclick="openEditModal(${m.id});switchTab('inventory',document.querySelector('.nav-tab'))">✏️ Restock</button></div>`; });
+        html+='</div>';
+      }
+      if(ok.length>0){
+        html+=`<div><div style="font-size:13px;font-weight:600;color:var(--yellow);margin-bottom:8px;display:flex;align-items:center;gap:6px">🟡 Low Stock (${ok.length})</div>`;
+        ok.forEach(m=>{ html+=`<div class="shortage-card ok"><div class="shortage-icon">${typeIcons[type]}</div><div class="shortage-info"><div class="shortage-name">${m.name}</div><div class="shortage-meta">Expiry: ${m.expiry} · Added by: ${m.addedBy||'—'}</div></div><div class="shortage-qty"><div class="shortage-qty-val">${m.qty!==null&&m.qty!==undefined?m.qty:0}</div><div class="shortage-qty-label">units left</div></div><button class="btn-sm btn-amber" style="margin-left:10px" onclick="openEditModal(${m.id});switchTab('inventory',document.querySelector('.nav-tab'))">✏️ Restock</button></div>`; });
+        html+='</div>';
+      }
+      html+='</div>';
+    });
+  }
+  document.getElementById('shortageContent').innerHTML=html;
+}
+
+/* ═══════════════════════════════════════════════════
+   BILLING — SMART SEARCH
+═══════════════════════════════════════════════════ */
+function getBillableMeds(){
+  return getMeds().filter(m=>getExpiryStatus(m.expiry).key!=='expired');
+}
+
+function onBillSearch(){
+  const q=document.getElementById('billSearch').value.trim();
+  const list=document.getElementById('billAutoList');
+  selectedBillMed=null;
+  document.getElementById('selectedMedInfo').style.display='none';
+  acIndex=-1;
+  if(!q){ list.style.display='none'; return; }
+  const meds=getBillableMeds();
+  const scored=meds.map(m=>{
+    const score=Math.max(fuzzyMatch(q,m.name)*2,fuzzyMatch(q,typeLabel(m.type||'other')));
+    return {m,score};
+  }).filter(x=>x.score>0).sort((a,b)=>b.score-a.score).slice(0,8);
+  if(!scored.length){ list.style.display='none'; return; }
+  list.innerHTML=scored.map((x,i)=>{
+    const sl=getStockLevel(x.m.type||'tablet',x.m.qty);
+    return `<div class="autocomplete-item" data-idx="${i}" onmousedown="selectBillMed(${x.m.id})">
+      <span class="status-pill ${typeCls(x.m.type||'other')} ac-type">${typeLabel(x.m.type||'other')}</span>
+      <span class="ac-name">${highlightMatch(x.m.name,q)}</span>
+      <span class="ac-qty ${sl.cls}" style="padding:2px 8px;border-radius:20px">${sl.icon} ${x.m.qty!==null&&x.m.qty!==undefined?x.m.qty:'—'}</span>
+      <span class="ac-price">₹${parseFloat(x.m.price).toFixed(2)}</span>
+    </div>`;
+  }).join('');
+  list._items=scored.map(x=>x.m.id);
+  list.style.display='block';
+}
+
+function onBillSearchKey(e){
+  const list=document.getElementById('billAutoList');
+  const items=list.querySelectorAll('.autocomplete-item');
+  if(!items.length)return;
+  if(e.key==='ArrowDown'){ e.preventDefault(); acIndex=Math.min(acIndex+1,items.length-1); items.forEach((el,i)=>el.classList.toggle('selected',i===acIndex)); }
+  else if(e.key==='ArrowUp'){ e.preventDefault(); acIndex=Math.max(acIndex-1,0); items.forEach((el,i)=>el.classList.toggle('selected',i===acIndex)); }
+  else if(e.key==='Enter'||e.key==='Tab'){ if(acIndex>=0&&list._items&&list._items[acIndex]!==undefined){ e.preventDefault(); selectBillMed(list._items[acIndex]); } }
+  else if(e.key==='Escape'){ document.getElementById('billAutoList').style.display='none'; }
+}
+
+function selectBillMed(id){
+  const med=getBillableMeds().find(m=>m.id===id); if(!med)return;
+  selectedBillMed=med;
+  document.getElementById('billSearch').value=med.name;
+  document.getElementById('billAutoList').style.display='none';
+  const sl=getStockLevel(med.type||'tablet',med.qty);
+  const info=document.getElementById('selectedMedInfo');
+  info.style.display='block';
+  info.innerHTML=`✅ Selected: <strong>${med.name}</strong> · ${typeLabel(med.type||'other')} · ₹${parseFloat(med.price).toFixed(2)} · Stock: <span class="${sl.cls}" style="padding:1px 6px;border-radius:10px">${sl.icon} ${med.qty!==null&&med.qty!==undefined?med.qty:'—'}</span>`;
+}
+
+/* ═══════════════════════════════════════════════════
+   CART — NO STOCK DEDUCTION HERE
+   Stock is only deducted when bill is GENERATED
+═══════════════════════════════════════════════════ */
 function addToBill(){
-  const id  = parseInt(document.getElementById('billMedSelect').value);
-  const qty = parseInt(document.getElementById('billQty').value)||1;
-  if(!id){ showToast('Select a medicine', 'warn'); return; }
-  const med = getMeds().find(m=>m.id===id);
-  if(!med) return;
-  const existing = cart.find(c=>c.id===id);
-  if(existing){ existing.qty+=qty; } else { cart.push({ id:med.id, name:med.name, price:med.price, qty }); }
+  if(!selectedBillMed){ showToast('Search and select a medicine first','warn'); return; }
+  const qty=parseInt(document.getElementById('billQty').value)||1;
+
+  // ── Check available stock before adding ──
+  if(selectedBillMed.qty !== null && selectedBillMed.qty !== undefined){
+    const alreadyInCart = cart.find(c=>c.id===selectedBillMed.id);
+    const alreadyQty = alreadyInCart ? alreadyInCart.qty : 0;
+    const totalWanted = alreadyQty + qty;
+    if(totalWanted > selectedBillMed.qty){
+      showToast(`Only ${selectedBillMed.qty} units available in stock`,'warn');
+      return;
+    }
+  }
+
+  const existing=cart.find(c=>c.id===selectedBillMed.id);
+  if(existing){ existing.qty+=qty; }
+  else{ cart.push({id:selectedBillMed.id,name:selectedBillMed.name,price:selectedBillMed.price,qty,type:selectedBillMed.type}); }
+
+  // NOTE: Stock is NOT deducted here. It will be deducted when bill is generated.
+
+  selectedBillMed=null;
+  document.getElementById('billSearch').value=''; document.getElementById('billQty').value='1';
+  document.getElementById('selectedMedInfo').style.display='none';
   renderCart();
+  showToast(existing?'Quantity updated':'Added to bill','success');
 }
 
 function renderCart(){
-  const container = document.getElementById('cartItems');
-  if(!cart.length){ container.innerHTML=`<div class="empty-state" style="padding:24px"><div class="icon">🛒</div><p>No items added yet</p></div>`; updateBillTotals(0); return; }
-  let html='', sub=0;
-  cart.forEach((item,i)=>{
-    const lineTotal = item.price*item.qty; sub+=lineTotal;
-    html+=`<div class="cart-item">
-      <div><div class="cart-name">${item.name}</div><div class="cart-price">₹${parseFloat(item.price).toFixed(2)} each · ₹${lineTotal.toFixed(2)} total</div></div>
-      <div class="cart-qty">
-        <button class="qty-btn" onclick="changeQty(${i},-1)">−</button>
-        <span class="qty-val">${item.qty}</span>
-        <button class="qty-btn" onclick="changeQty(${i},1)">+</button>
-        <button class="btn-sm btn-danger" style="margin-left:6px" onclick="removeCartItem(${i})">✕</button>
-      </div>
-    </div>`;
-  });
+  const container=document.getElementById('cartItems');
+  const notice=document.getElementById('stockDeductNotice');
+  if(!cart.length){
+    container.innerHTML=`<div class="empty-state" style="padding:24px"><div class="icon">🛒</div><p>No items added yet</p></div>`;
+    updateBillTotals(0);
+    notice.classList.remove('visible');
+    return;
+  }
+  let html='',sub=0;
+  cart.forEach((item,i)=>{ const lt=item.price*item.qty; sub+=lt; html+=`<div class="cart-item"><div><div class="cart-name">${item.name}</div><div class="cart-price">₹${parseFloat(item.price).toFixed(2)} each · ₹${lt.toFixed(2)} total</div></div><div class="cart-qty"><button class="qty-btn" onclick="changeQty(${i},-1)">−</button><span class="qty-val">${item.qty}</span><button class="qty-btn" onclick="changeQty(${i},1)">+</button><button class="btn-sm btn-danger" style="margin-left:6px" onclick="removeCartItem(${i})">✕</button></div></div>`; });
   container.innerHTML=html;
   updateBillTotals(sub);
+  notice.classList.add('visible');
 }
 
-function changeQty(i,delta){ cart[i].qty=Math.max(1,cart[i].qty+delta); renderCart(); }
+function changeQty(i,delta){
+  const newQty=Math.max(1,cart[i].qty+delta);
+  // Check stock limit
+  const meds=getMeds(); const med=meds.find(m=>m.id===cart[i].id);
+  if(med&&med.qty!==null&&med.qty!==undefined&&newQty>med.qty){
+    showToast(`Only ${med.qty} units available in stock`,'warn'); return;
+  }
+  cart[i].qty=newQty; renderCart();
+}
 function removeCartItem(i){ cart.splice(i,1); renderCart(); }
 function clearCart(){ cart=[]; renderCart(); }
 
-function updateBillTotals(sub){
-  const discount = sub*0.03;
-  const total    = sub - discount;
-  document.getElementById('subtotalAmt').textContent  = '₹'+sub.toFixed(2);
-  document.getElementById('discountAmt').textContent  = '-₹'+discount.toFixed(2);
-  document.getElementById('totalAmt').textContent     = '₹'+total.toFixed(2);
-}
+function updateBillTotals(sub){ const d=sub*0.03; const t=sub-d; document.getElementById('subtotalAmt').textContent='₹'+sub.toFixed(2); document.getElementById('discountAmt').textContent='-₹'+d.toFixed(2); document.getElementById('totalAmt').textContent='₹'+t.toFixed(2); }
 
+/* ═══════════════════════════════════════════════════
+   GENERATE BILL — STOCK IS DEDUCTED HERE ONLY
+═══════════════════════════════════════════════════ */
 function generateBill(){
-  if(!cart.length){ showToast('Add medicines to the bill first', 'warn'); return; }
-  const patient  = document.getElementById('patientName').value.trim()||'Walk-in';
-  const doctor   = document.getElementById('doctorRef').value.trim()||'—';
-  const sub      = cart.reduce((a,c)=>a+c.price*c.qty,0);
-  const discount = sub*0.03;
-  const total    = sub-discount;
-  const billId   = 'RX-'+Date.now().toString().slice(-6);
-  const date     = new Date().toLocaleString('en-IN');
-  const bill = { billId, patient, doctor, date, items:JSON.parse(JSON.stringify(cart)), sub, discount, total, generatedBy:currentUser };
-  const history = STORE.get('ms_bills')||[];
-  history.unshift(bill);
-  STORE.set('ms_bills',history);
+  if(!cart.length){ showToast('Add medicines to the bill first','warn'); return; }
+
+  // ── Validate stock availability before finalising ──
+  const meds=getMeds();
+  for(const item of cart){
+    const med=meds.find(m=>m.id===item.id);
+    if(med&&med.qty!==null&&med.qty!==undefined&&item.qty>med.qty){
+      showToast(`Not enough stock for "${item.name}". Available: ${med.qty}, Requested: ${item.qty}`,'error');
+      return;
+    }
+  }
+
+  // ── Deduct stock from inventory ──
+  cart.forEach(item=>{
+    const idx=meds.findIndex(m=>m.id===item.id);
+    if(idx!==-1&&meds[idx].qty!==null&&meds[idx].qty!==undefined){
+      meds[idx].qty=Math.max(0,meds[idx].qty-item.qty);
+    }
+  });
+  saveMeds(meds);
+  renderShortageBadge();
+
+  // ── Save bill ──
+  const patient=document.getElementById('patientName').value.trim()||'Walk-in';
+  const doctor=document.getElementById('doctorRef').value.trim()||'—';
+  const sub=cart.reduce((a,c)=>a+c.price*c.qty,0); const discount=sub*0.03; const total=sub-discount;
+  const billId='RX-'+Date.now().toString().slice(-6); const date=new Date().toLocaleString('en-IN');
+  const bill={billId,patient,doctor,date,items:JSON.parse(JSON.stringify(cart)),sub,discount,total,generatedBy:currentUser};
+  const history=STORE.get('ms_bills')||[]; history.unshift(bill); STORE.set('ms_bills',history);
+
   showReceipt(bill);
 }
 
 function showReceipt(bill){
-  const discount = bill.discount != null ? bill.discount : (bill.sub * 0.03);
-  let rows = bill.items.map(item=>`
-    <tr>
-      <td>${item.name}</td>
-      <td style="text-align:center">${item.qty}</td>
-      <td style="text-align:right">₹${parseFloat(item.price).toFixed(2)}</td>
-      <td style="text-align:right">₹${(item.price*item.qty).toFixed(2)}</td>
-    </tr>`).join('');
-  document.getElementById('receiptContent').innerHTML = `
-    <div class="receipt-header">
-      <h2>💊 Rajeshwari Medical</h2>
-      <div class="store-sub">& General Store</div>
-      <p style="margin-top:8px;font-weight:600">${bill.billId} &nbsp;|&nbsp; ${bill.date}</p>
-    </div>
-    <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:16px">
-      <div><strong>Patient:</strong> ${bill.patient}</div>
-      <div><strong>Dr. Ref:</strong> ${bill.doctor}</div>
-    </div>
-    <table class="receipt-table">
-      <thead><tr><th>Medicine</th><th style="text-align:center">Qty</th><th style="text-align:right">Rate</th><th style="text-align:right">Amount</th></tr></thead>
-      <tbody>${rows}</tbody>
-    </table>
+  const discount=bill.discount!=null?bill.discount:(bill.sub*0.03);
+  let rows=bill.items.map(item=>`<tr><td>${item.name}</td><td style="text-align:center">${item.qty}</td><td style="text-align:right">₹${parseFloat(item.price).toFixed(2)}</td><td style="text-align:right">₹${(item.price*item.qty).toFixed(2)}</td></tr>`).join('');
+  document.getElementById('receiptContent').innerHTML=`
+    <div class="receipt-header"><h2>💊 Rajeshwari Medical</h2><div class="store-sub">& General Store</div><p style="margin-top:8px;font-weight:600">${bill.billId} &nbsp;|&nbsp; ${bill.date}</p></div>
+    <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:16px"><div><strong>Patient:</strong> ${bill.patient}</div><div><strong>Dr. Ref:</strong> ${bill.doctor}</div></div>
+    <table class="receipt-table"><thead><tr><th>Medicine</th><th style="text-align:center">Qty</th><th style="text-align:right">Rate</th><th style="text-align:right">Amount</th></tr></thead><tbody>${rows}</tbody></table>
     <div style="text-align:right;font-size:13px;color:var(--muted)">Subtotal: ₹${bill.sub.toFixed(2)}</div>
     <div style="text-align:right;font-size:13px;color:var(--green)">Discount (3%): -₹${discount.toFixed(2)}</div>
     <div class="receipt-total">Total: ₹${bill.total.toFixed(2)}</div>
     <div class="receipt-footer">Served by: ${bill.generatedBy} &nbsp;|&nbsp; Thank you for your visit!<br><span style="font-size:10px">Please preserve this receipt for reference</span></div>`;
-
-  // Clear old debug log
-  const log = document.getElementById('btDebugLog');
-  if (log) { log.innerHTML = ''; log.style.display = 'none'; }
-
+  const log=document.getElementById('btDebugLog'); if(log){log.innerHTML='';log.style.display='none';}
   document.getElementById('receiptModal').classList.add('open');
   updateBtPrintHint();
 }
 
-function closeReceipt(){
-  document.getElementById('receiptModal').classList.remove('open');
-}
+function closeReceipt(){ document.getElementById('receiptModal').classList.remove('open'); }
+function startNewBill(){ closeReceipt(); cart=[]; renderCart(); document.getElementById('patientName').value=''; document.getElementById('doctorRef').value=''; }
 
-function startNewBill(){
-  closeReceipt();
-  cart=[];
-  renderCart();
-  document.getElementById('patientName').value='';
-  document.getElementById('doctorRef').value='';
-}
-
-/* ═══════════════════════════════════════════
+/* ═══════════════════════════════════════════════════
    HISTORY
-═══════════════════════════════════════════ */
+═══════════════════════════════════════════════════ */
 function renderHistory(){
-  const bills = STORE.get('ms_bills')||[];
-  const container = document.getElementById('billHistoryList');
-  const total = bills.reduce((a,b)=>a+b.total,0);
-  const avg   = bills.length ? total/bills.length : 0;
-  document.getElementById('hStatBills').textContent = bills.length;
-  document.getElementById('hStatRev').textContent   = '₹'+total.toFixed(0);
-  document.getElementById('hStatAvg').textContent   = '₹'+avg.toFixed(0);
+  const bills=STORE.get('ms_bills')||[]; const container=document.getElementById('billHistoryList');
+  const total=bills.reduce((a,b)=>a+b.total,0); const avg=bills.length?total/bills.length:0;
+  document.getElementById('hStatBills').textContent=bills.length;
+  document.getElementById('hStatRev').textContent='₹'+total.toFixed(0);
+  document.getElementById('hStatAvg').textContent='₹'+avg.toFixed(0);
   if(!bills.length){ container.innerHTML=`<div class="empty-state"><div class="icon">📋</div><p>No bills generated yet</p></div>`; return; }
-  container.innerHTML = bills.map(b=>`
-    <div class="bill-record">
-      <div>
-        <div style="font-weight:600;font-size:14px">${b.billId}</div>
-        <div style="font-size:12px;color:var(--muted)">${b.date} &nbsp;·&nbsp; ${b.patient} &nbsp;·&nbsp; ${b.items.length} item(s)</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:12px">
-        <div style="font-weight:600;color:var(--green)">₹${b.total.toFixed(2)}</div>
-        <button class="btn-sm btn-blue" onclick='showReceipt(${JSON.stringify(b)})'>View</button>
-      </div>
-    </div>`).join('');
+  container.innerHTML=bills.map(b=>`<div class="bill-record"><div><div style="font-weight:600;font-size:14px">${b.billId}</div><div style="font-size:12px;color:var(--muted)">${b.date} &nbsp;·&nbsp; ${b.patient} &nbsp;·&nbsp; ${b.items.length} item(s)</div></div><div style="display:flex;align-items:center;gap:12px"><div style="font-weight:600;color:var(--green)">₹${b.total.toFixed(2)}</div><button class="btn-sm btn-blue" onclick='showReceipt(${JSON.stringify(b)})'>View</button></div></div>`).join('');
 }
 
-/* Keyboard shortcut */
-document.addEventListener('keydown', e=>{
-  if(e.key==='Enter'){ const ls = document.getElementById('loginScreen'); if(ls && ls.style.display!=='none') doLogin(); }
+/* ═══════════════════════════════════════════════════
+   KEYBOARD
+═══════════════════════════════════════════════════ */
+// ── Auto-fill remembered credentials on page load ──
+(function loadRemembered(){
+  const ru = localStorage.getItem('ms_remember_user');
+  const rp = localStorage.getItem('ms_remember_pass');
+  if(ru && rp){
+    document.getElementById('loginUser').value = ru;
+    document.getElementById('loginPass').value = rp;
+    document.getElementById('rememberMe').checked = true;
+    document.getElementById('savedUserHint').style.display = 'inline';
+  }
+})();
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){ const ls=document.getElementById('loginScreen'); if(ls&&ls.style.display!=='none')doLogin(); }
+});
+
+document.addEventListener('click',e=>{
+  const list=document.getElementById('billAutoList');
+  if(list&&!list.contains(e.target)&&e.target.id!=='billSearch') list.style.display='none';
 });
 </script>
 </body>
