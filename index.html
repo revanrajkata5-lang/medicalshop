@@ -33,7 +33,6 @@
 
   body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-  /* ── LOGIN ── */
   #loginScreen {
     min-height: 100vh; display: flex; align-items: center; justify-content: center;
     background: linear-gradient(135deg, #0d5c34 0%, #1a7a4a 50%, #2fa365 100%);
@@ -58,15 +57,17 @@
   .login-error { background:var(--red-light); color:var(--red); border-radius:8px; padding:10px 14px; font-size:13px; margin-bottom:16px; display:none; }
   .login-hint { margin-top:20px; text-align:center; font-size:12px; color:var(--muted); }
 
-  /* ── APP SHELL ── */
   #appScreen { display:none; }
   .topbar { background:white; border-bottom:1px solid var(--border); padding:0 28px; height:60px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; box-shadow:0 1px 8px rgba(0,0,0,0.06); }
   .topbar-logo { font-family:'Instrument Serif',serif; font-size:18px; color:var(--text); line-height:1.2; }
   .topbar-logo span { color:var(--green); }
-  .topbar-right { display:flex; align-items:center; gap:16px; }
+  .topbar-right { display:flex; align-items:center; gap:10px; }
   .topbar-user { font-size:14px; color:var(--muted); font-weight:500; }
   .btn-logout { padding:7px 16px; background:var(--red-light); color:var(--red); border:none; border-radius:8px; font-family:inherit; font-size:13px; font-weight:500; cursor:pointer; transition:background 0.2s; }
   .btn-logout:hover { background:#f9d4d0; }
+  .btn-printer { padding:7px 14px; background:var(--blue-light); color:var(--blue); border:none; border-radius:8px; font-family:inherit; font-size:13px; font-weight:500; cursor:pointer; transition:all 0.2s; white-space:nowrap; max-width:220px; overflow:hidden; text-overflow:ellipsis; }
+  .btn-printer:hover { background:#cce0ff; }
+  .btn-printer.connected { background:var(--green-light); color:var(--green); }
 
   .nav-tabs { background:white; border-bottom:1px solid var(--border); display:flex; padding:0 28px; gap:0; }
   .nav-tab { padding:14px 22px; font-size:14px; font-weight:500; color:var(--muted); cursor:pointer; border-bottom:3px solid transparent; transition:all 0.2s; user-select:none; }
@@ -76,7 +77,6 @@
   .page { display:none; padding:28px; max-width:1100px; margin:0 auto; }
   .page.active { display:block; }
 
-  /* ── CARDS & FORMS ── */
   .card { background:var(--card); border-radius:var(--radius); border:1px solid var(--border); padding:24px; box-shadow:var(--shadow); margin-bottom:24px; }
   .card-title { font-size:16px; font-weight:600; margin-bottom:18px; color:var(--text); display:flex; align-items:center; gap:8px; }
   .input-row { display:grid; grid-template-columns:2fr 1.5fr 1fr auto; gap:10px; align-items:end; }
@@ -87,7 +87,6 @@
   .btn-add { padding:10px 20px; background:var(--green); color:white; border:none; border-radius:8px; font-family:inherit; font-size:14px; font-weight:500; cursor:pointer; white-space:nowrap; transition:background 0.2s; height:40px; }
   .btn-add:hover { background:#155e39; }
 
-  /* ── TABLE ── */
   .table-wrap { overflow-x:auto; }
   table { width:100%; border-collapse:collapse; font-size:14px; }
   th { padding:10px 14px; text-align:left; font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; background:var(--bg); border-bottom:1px solid var(--border); }
@@ -95,12 +94,11 @@
   tr:last-child td { border-bottom:none; }
   tr:hover td { background:#f9fbfa; }
 
-  /* Status pills — 4 states */
   .status-pill { display:inline-block; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:500; }
-  .status-safe    { background:var(--green-light);  color:#1a5c35; }       /* >1 year */
-  .status-year    { background:var(--yellow-light); color:var(--yellow); } /* 6–12 months */
-  .status-warning { background:var(--sky-light);    color:var(--sky); }    /* ≤6 months */
-  .status-expired { background:var(--red-light);    color:var(--red); }    /* expired */
+  .status-safe    { background:var(--green-light);  color:#1a5c35; }
+  .status-year    { background:var(--yellow-light); color:var(--yellow); }
+  .status-warning { background:var(--sky-light);    color:var(--sky); }
+  .status-expired { background:var(--red-light);    color:var(--red); }
 
   .btn-sm { padding:5px 12px; border:none; border-radius:6px; font-family:inherit; font-size:12px; font-weight:500; cursor:pointer; transition:all 0.15s; }
   .btn-danger  { background:var(--red-light);  color:var(--red);  }
@@ -114,7 +112,6 @@
   .empty-state .icon { font-size:40px; margin-bottom:12px; }
   .empty-state p { font-size:15px; }
 
-  /* ── STATS ROW ── */
   .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
   .stat-card { background:var(--card); border-radius:var(--radius); border:1px solid var(--border); padding:18px 20px; }
   .stat-label { font-size:12px; color:var(--muted); font-weight:500; text-transform:uppercase; letter-spacing:0.4px; margin-bottom:8px; }
@@ -125,7 +122,6 @@
   .stat-value.sky    { color:var(--sky);   }
   .stat-value.yellow { color:var(--yellow);}
 
-  /* ── BILLING ── */
   .billing-grid { display:grid; grid-template-columns:1fr 380px; gap:24px; align-items:start; }
   .cart-item { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid #f0f4f2; }
   .cart-item:last-child { border-bottom:none; }
@@ -142,7 +138,6 @@
   .btn-generate { width:100%; margin-top:16px; padding:13px; background:var(--green); color:white; border:none; border-radius:10px; font-family:inherit; font-size:15px; font-weight:500; cursor:pointer; transition:background 0.2s; }
   .btn-generate:hover { background:#155e39; }
 
-  /* ── RECEIPT MODAL ── */
   .modal-bg { position:fixed; inset:0; background:rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; z-index:999; }
   .modal-bg.open { display:flex; }
   .modal { background:white; border-radius:16px; padding:36px; width:480px; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.25); }
@@ -155,12 +150,18 @@
   .receipt-table td { padding:8px 0; border-bottom:1px dashed #eee; }
   .receipt-total { font-size:18px; font-weight:600; text-align:right; padding-top:10px; color:var(--green); }
   .receipt-footer { text-align:center; margin-top:20px; font-size:12px; color:var(--muted); border-top:1px dashed var(--border); padding-top:16px; }
-  .modal-actions { display:flex; gap:10px; margin-top:20px; }
+  .modal-actions { display:flex; flex-direction:column; gap:8px; margin-top:20px; }
+  .modal-actions-row { display:flex; gap:8px; }
   .btn-print    { flex:1; padding:11px; background:var(--green); color:white; border:none; border-radius:8px; font-family:inherit; font-size:14px; font-weight:500; cursor:pointer; }
+  .btn-bt-print { flex:1; padding:11px; background:var(--blue); color:white; border:none; border-radius:8px; font-family:inherit; font-size:13px; font-weight:500; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:background 0.2s; }
+  .btn-bt-print:hover:not(:disabled) { background:#0d47a1; }
+  .btn-bt-print:disabled { opacity:0.38; cursor:not-allowed; background:#90a4ae; }
+  .btn-bt-print.connected { background:var(--green); }
+  .btn-bt-print.connected:hover:not(:disabled) { background:#155e39; }
   .btn-newbill  { flex:1; padding:11px; background:var(--blue-light); color:var(--blue); border:none; border-radius:8px; font-family:inherit; font-size:14px; font-weight:500; cursor:pointer; }
   .btn-close    { flex:1; padding:11px; background:var(--bg); color:var(--text); border:1px solid var(--border); border-radius:8px; font-family:inherit; font-size:14px; font-weight:500; cursor:pointer; }
+  .bt-status-hint { font-size:12px; text-align:center; color:var(--muted); padding:2px 0; }
 
-  /* ── SEARCH ── */
   .search-row { display:flex; gap:10px; margin-bottom:16px; align-items:center; }
   .search-input { flex:1; padding:10px 14px; border:1.5px solid var(--border); border-radius:8px; font-family:inherit; font-size:14px; outline:none; background:#fafcfb; transition:border-color 0.2s; }
   .search-input:focus { border-color:var(--green-mid); }
@@ -171,11 +172,18 @@
   .bill-record { padding:14px 0; border-bottom:1px solid #f0f4f2; display:flex; align-items:center; justify-content:space-between; }
   .bill-record:last-child { border-bottom:none; }
 
+  #printerStatusBar { display:none; background:var(--green-light); color:var(--green); font-size:13px; font-weight:500; text-align:center; padding:6px; border-bottom:1px solid #b2ddc4; }
+
+  /* Printer debug log */
+  #btDebugLog { display:none; background:#1a1a1a; color:#00ff88; font-family:monospace; font-size:11px; padding:10px 14px; border-radius:8px; margin-top:10px; max-height:120px; overflow-y:auto; }
+
   @media (max-width:768px) {
     .stats-row { grid-template-columns:repeat(2,1fr); }
     .billing-grid { grid-template-columns:1fr; }
     .input-row { grid-template-columns:1fr; }
     .billing-add-row { grid-template-columns:1fr; }
+    .topbar-right { gap:6px; }
+    .btn-printer { font-size:12px; padding:6px 10px; }
   }
   @media print {
     body * { visibility:hidden !important; }
@@ -188,7 +196,6 @@
 </head>
 <body>
 
-<!-- ═══ LOGIN SCREEN ═══ -->
 <div id="loginScreen">
   <div class="login-card">
     <div class="login-logo">
@@ -207,15 +214,17 @@
       <input type="password" id="loginPass" placeholder="Enter password" autocomplete="current-password" />
     </div>
     <button class="btn-primary" onclick="doLogin()">Sign In</button>
-    <div class="login-hint" style="margin-top:20px">Contact your admin to get account access</div>
+    <div class="login-hint">Contact your admin to get account access</div>
   </div>
 </div>
 
-<!-- ═══ APP SCREEN ═══ -->
 <div id="appScreen">
+  <div id="printerStatusBar">🖨️ Bluetooth printer connected — receipts will print wirelessly</div>
+
   <div class="topbar">
     <div class="topbar-logo">Rajeshwari Medical <span>& General Store</span></div>
     <div class="topbar-right">
+      <button id="btBtn" class="btn-printer" onclick="connectBTPrinter()">🖨️ Connect Printer</button>
       <span class="topbar-user">👤 <span id="currentUserLabel"></span></span>
       <button class="btn-logout" onclick="doLogout()">Sign Out</button>
     </div>
@@ -228,50 +237,24 @@
     <div class="nav-tab" id="adminTab" onclick="switchTab('admin',this)" style="display:none">⚙️ Admin Panel</div>
   </div>
 
-  <!-- ── INVENTORY PAGE ── -->
+  <!-- INVENTORY PAGE -->
   <div class="page active" id="page-inventory">
     <div class="stats-row" style="grid-template-columns:repeat(5,1fr)">
-      <div class="stat-card">
-        <div class="stat-label">Total Medicines</div>
-        <div class="stat-value green" id="statTotal">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Expired</div>
-        <div class="stat-value red" id="statExpired">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">≤6 Months</div>
-        <div class="stat-value sky" id="statWarning">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">6–12 Months</div>
-        <div class="stat-value yellow" id="statYear">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Good Stock</div>
-        <div class="stat-value green" id="statGood">0</div>
-      </div>
+      <div class="stat-card"><div class="stat-label">Total Medicines</div><div class="stat-value green" id="statTotal">0</div></div>
+      <div class="stat-card"><div class="stat-label">Expired</div><div class="stat-value red" id="statExpired">0</div></div>
+      <div class="stat-card"><div class="stat-label">≤6 Months</div><div class="stat-value sky" id="statWarning">0</div></div>
+      <div class="stat-card"><div class="stat-label">6–12 Months</div><div class="stat-value yellow" id="statYear">0</div></div>
+      <div class="stat-card"><div class="stat-label">Good Stock</div><div class="stat-value green" id="statGood">0</div></div>
     </div>
-
     <div class="card">
       <div class="card-title">➕ Add Medicine to Stock</div>
       <div class="input-row">
-        <div class="form-group">
-          <label>Medicine Name</label>
-          <input type="text" id="medName" placeholder="e.g. Paracetamol 500mg" />
-        </div>
-        <div class="form-group">
-          <label>Expiry Date</label>
-          <input type="date" id="expiryDate" />
-        </div>
-        <div class="form-group">
-          <label>Price (₹)</label>
-          <input type="number" id="medPrice" placeholder="0.00" min="0" step="0.01" />
-        </div>
+        <div class="form-group"><label>Medicine Name</label><input type="text" id="medName" placeholder="e.g. Paracetamol 500mg" /></div>
+        <div class="form-group"><label>Expiry Date</label><input type="date" id="expiryDate" /></div>
+        <div class="form-group"><label>Price (₹)</label><input type="number" id="medPrice" placeholder="0.00" min="0" step="0.01" /></div>
         <button class="btn-add" onclick="addMedicine()">+ Add</button>
       </div>
     </div>
-
     <div class="card">
       <div class="card-title">📦 Stock List
         <div style="margin-left:auto;font-size:12px;display:flex;gap:8px;font-weight:400;color:var(--muted);align-items:center">
@@ -293,69 +276,36 @@
       </div>
       <div class="table-wrap">
         <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Medicine Name</th>
-              <th>Expiry Date</th>
-              <th>Price</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
+          <thead><tr><th>#</th><th>Medicine Name</th><th>Expiry Date</th><th>Price</th><th>Status</th><th>Action</th></tr></thead>
           <tbody id="medList"></tbody>
         </table>
       </div>
-      <div id="invEmpty" class="empty-state" style="display:none">
-        <div class="icon">📭</div>
-        <p>No medicines in stock. Add some above.</p>
-      </div>
+      <div id="invEmpty" class="empty-state" style="display:none"><div class="icon">📭</div><p>No medicines in stock. Add some above.</p></div>
     </div>
   </div>
 
-  <!-- ── BILLING PAGE ── -->
+  <!-- BILLING PAGE -->
   <div class="page" id="page-billing">
     <div class="billing-grid">
       <div>
         <div class="card">
           <div class="card-title">🔍 Add to Bill</div>
           <div class="billing-add-row">
-            <div class="form-group">
-              <label>Select Medicine</label>
-              <select id="billMedSelect">
-                <option value="">-- Choose medicine --</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Quantity</label>
-              <input type="number" id="billQty" value="1" min="1" />
-            </div>
+            <div class="form-group"><label>Select Medicine</label><select id="billMedSelect"><option value="">-- Choose medicine --</option></select></div>
+            <div class="form-group"><label>Quantity</label><input type="number" id="billQty" value="1" min="1" /></div>
             <button class="btn-add" onclick="addToBill()">Add</button>
           </div>
         </div>
-
         <div class="card">
           <div class="card-title">🛒 Current Bill Items</div>
-          <div id="cartItems">
-            <div class="empty-state" style="padding:24px">
-              <div class="icon">🛒</div>
-              <p>No items added yet</p>
-            </div>
-          </div>
+          <div id="cartItems"><div class="empty-state" style="padding:24px"><div class="icon">🛒</div><p>No items added yet</p></div></div>
         </div>
       </div>
-
       <div>
         <div class="card" style="position:sticky;top:80px">
           <div class="card-title">🧾 Bill Summary</div>
-          <div class="form-group" style="margin-bottom:14px">
-            <label>Patient / Customer Name</label>
-            <input type="text" id="patientName" placeholder="Enter name (optional)" />
-          </div>
-          <div class="form-group" style="margin-bottom:0">
-            <label>Doctor / Prescription Ref</label>
-            <input type="text" id="doctorRef" placeholder="Dr. name or Ref. no." />
-          </div>
+          <div class="form-group" style="margin-bottom:14px"><label>Patient / Customer Name</label><input type="text" id="patientName" placeholder="Enter name (optional)" /></div>
+          <div class="form-group" style="margin-bottom:0"><label>Doctor / Prescription Ref</label><input type="text" id="doctorRef" placeholder="Dr. name or Ref. no." /></div>
           <div class="bill-summary">
             <div class="bill-row"><span>Subtotal</span><span id="subtotalAmt">₹0.00</span></div>
             <div class="bill-row"><span>Discount (3%)</span><span id="discountAmt" style="color:var(--green)">-₹0.00</span></div>
@@ -368,14 +318,13 @@
     </div>
   </div>
 
-  <!-- ── ADMIN PAGE ── -->
+  <!-- ADMIN PAGE -->
   <div class="page" id="page-admin">
     <div class="stats-row" style="grid-template-columns:repeat(3,1fr)">
       <div class="stat-card"><div class="stat-label">Total Users</div><div class="stat-value green" id="aStatUsers">0</div></div>
       <div class="stat-card"><div class="stat-label">Admin Accounts</div><div class="stat-value amber" id="aStatAdmins">0</div></div>
       <div class="stat-card"><div class="stat-label">Staff Accounts</div><div class="stat-value" id="aStatStaff">0</div></div>
     </div>
-
     <div class="card">
       <div class="card-title">➕ Create New User</div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:end">
@@ -386,26 +335,19 @@
       </div>
       <div id="adminCreateMsg" style="margin-top:10px;font-size:13px;display:none"></div>
     </div>
-
     <div class="card">
       <div class="card-title">👥 All Users</div>
       <div class="table-wrap">
         <table>
-          <thead>
-            <tr><th>#</th><th>Username</th><th>Role</th><th>New Password</th><th>Change Role</th><th>Action</th></tr>
-          </thead>
+          <thead><tr><th>#</th><th>Username</th><th>Role</th><th>New Password</th><th>Change Role</th><th>Action</th></tr></thead>
           <tbody id="userList"></tbody>
         </table>
       </div>
     </div>
-
-    <!-- Staff Activity -->
     <div class="card">
       <div class="card-title">🔍 Staff Activity Monitor
         <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-          <select id="activityUserFilter" onchange="renderStaffActivity()" style="padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;outline:none">
-            <option value="all">All Staff</option>
-          </select>
+          <select id="activityUserFilter" onchange="renderStaffActivity()" style="padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;outline:none"><option value="all">All Staff</option></select>
           <select id="activityTypeFilter" onchange="renderStaffActivity()" style="padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;outline:none">
             <option value="all">All Activity</option>
             <option value="medicine">Medicines Added</option>
@@ -416,19 +358,15 @@
       <div id="staffSummaryCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px"></div>
       <div class="table-wrap">
         <table>
-          <thead>
-            <tr><th>Type</th><th>Staff</th><th>Details</th><th>Amount / Price</th><th>Date & Time</th></tr>
-          </thead>
+          <thead><tr><th>Type</th><th>Staff</th><th>Details</th><th>Amount / Price</th><th>Date & Time</th></tr></thead>
           <tbody id="activityList"></tbody>
         </table>
       </div>
-      <div id="activityEmpty" class="empty-state" style="display:none;padding:32px">
-        <div class="icon">🔍</div><p>No activity found</p>
-      </div>
+      <div id="activityEmpty" class="empty-state" style="display:none;padding:32px"><div class="icon">🔍</div><p>No activity found</p></div>
     </div>
   </div>
 
-  <!-- ── HISTORY PAGE ── -->
+  <!-- HISTORY PAGE -->
   <div class="page" id="page-history">
     <div class="stats-row" style="grid-template-columns:repeat(3,1fr)">
       <div class="stat-card"><div class="stat-label">Total Bills</div><div class="stat-value green" id="hStatBills">0</div></div>
@@ -437,32 +375,39 @@
     </div>
     <div class="card">
       <div class="card-title">📋 Bill History</div>
-      <div id="billHistoryList">
-        <div class="empty-state"><div class="icon">📋</div><p>No bills generated yet</p></div>
+      <div id="billHistoryList"><div class="empty-state"><div class="icon">📋</div><p>No bills generated yet</p></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- RECEIPT MODAL -->
+<div class="modal-bg" id="receiptModal">
+  <div class="modal">
+    <div id="receiptContent"></div>
+    <div class="modal-actions">
+      <div class="modal-actions-row">
+        <button class="btn-print" onclick="doBrowserPrint()">🖨️ Browser Print</button>
+        <button class="btn-bt-print" id="btPrintBtn" onclick="doBTPrint()">📡 Bluetooth Print</button>
+      </div>
+      <div class="bt-status-hint" id="btPrintHint">Bluetooth printer not connected</div>
+      <div id="btDebugLog"></div>
+      <div class="modal-actions-row">
+        <button class="btn-newbill" onclick="startNewBill()">🆕 New Bill</button>
+        <button class="btn-close"   onclick="closeReceipt()">Close</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ═══ RECEIPT MODAL ═══ -->
-<div class="modal-bg" id="receiptModal">
-  <div class="modal">
-    <div id="receiptContent"></div>
-    <div class="modal-actions">
-      <button class="btn-print"   onclick="printReceipt()">🖨️ Print</button>
-      <button class="btn-newbill" onclick="startNewBill()">🆕 New Bill</button>
-      <button class="btn-close"   onclick="closeReceipt()">Close</button>
-    </div>
-  </div>
-</div>
-
 <script>
+/* ═══════════════════════════════════════════
+   STORAGE HELPER
+═══════════════════════════════════════════ */
 const STORE = {
   get(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } },
   set(k,v){ localStorage.setItem(k, JSON.stringify(v)); },
 };
 
-// Ensure default admin exists
 (function initUsers(){
   let users = STORE.get('ms_users') || {};
   let roles = STORE.get('ms_roles') || {};
@@ -476,7 +421,391 @@ const STORE = {
 let currentUser = null;
 let cart = [];
 
-// ── AUTH ──
+/* ═══════════════════════════════════════════
+   BLUETOOTH THERMAL PRINTER
+   Tuned for 58mm RPP02/MTP-II style printers
+   (the black portable printer in your photo)
+═══════════════════════════════════════════ */
+let btDevice = null;
+let btCharacteristic = null;
+
+// All known service UUIDs for common 58mm BT thermal printers
+const PRINTER_SERVICE_UUIDS = [
+  '000018f0-0000-1000-8000-00805f9b34fb',  // Common generic thermal
+  '0000ff00-0000-1000-8000-00805f9b34fb',  // RPP02 / Goojprt
+  '0000ffe0-0000-1000-8000-00805f9b34fb',  // HM-10 BLE serial
+  '49535343-fe7d-4ae5-8fa9-9fafd205e455',  // ISSC UART
+  'e7810a71-73ae-499d-8c15-faa9aef0c3f2',  // Xprinter / Rongta
+  '0000ff12-0000-1000-8000-00805f9b34fb',  // Alternate
+];
+
+// Known TX characteristic UUIDs (write to printer)
+const PRINTER_CHAR_UUIDS = [
+  '0000ff02-0000-1000-8000-00805f9b34fb',  // RPP02 TX — most common for your printer type
+  '00002af1-0000-1000-8000-00805f9b34fb',
+  '49535343-8841-43f4-a8d4-ecbe34729bb3',  // ISSC TX
+  '0000ffe1-0000-1000-8000-00805f9b34fb',  // HM-10 TX
+  'bef8d6c9-9c21-4c9e-b632-bd58c1009f9f',
+  '0000ff01-0000-1000-8000-00805f9b34fb',
+];
+
+function btLog(msg) {
+  const log = document.getElementById('btDebugLog');
+  if (!log) return;
+  log.style.display = 'block';
+  const line = document.createElement('div');
+  line.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg;
+  log.appendChild(line);
+  log.scrollTop = log.scrollHeight;
+}
+
+async function connectBTPrinter() {
+  if (!navigator.bluetooth) {
+    showToast('Web Bluetooth not supported. Use Chrome or Edge on Android/Desktop.', 'warn');
+    return;
+  }
+  const btn = document.getElementById('btBtn');
+  btn.textContent = '🔄 Scanning...';
+  btn.disabled = true;
+
+  try {
+    btDevice = await navigator.bluetooth.requestDevice({
+      acceptAllDevices: true,
+      optionalServices: PRINTER_SERVICE_UUIDS
+    });
+  } catch(e) {
+    console.log('BT cancelled:', e.name);
+    resetPrinterBtn();
+    return;
+  }
+
+  btn.textContent = '🔄 Connecting...';
+
+  // GATT connect with retry
+  let server = null;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      if (attempt > 1) await new Promise(r => setTimeout(r, 1200));
+      server = await btDevice.gatt.connect();
+      btLog('GATT connected on attempt ' + attempt);
+      break;
+    } catch(e) {
+      btLog('GATT attempt ' + attempt + ' failed: ' + e.message);
+      if (attempt === 3) {
+        showToast('Cannot connect. Turn printer OFF and ON, then retry.', 'warn');
+        resetPrinterBtn();
+        return;
+      }
+    }
+  }
+
+  // Discover services
+  let allServices = [];
+  try {
+    allServices = await server.getPrimaryServices();
+    btLog('Found ' + allServices.length + ' service(s): ' + allServices.map(s=>s.uuid).join(', '));
+  } catch(e) {
+    btLog('getPrimaryServices failed: ' + e.message);
+  }
+
+  // Try known service UUIDs first, then fall back to discovered
+  let service = null;
+  for (const uuid of PRINTER_SERVICE_UUIDS) {
+    try {
+      service = await server.getPrimaryService(uuid);
+      btLog('Service found: ' + uuid);
+      break;
+    } catch(e) { /* try next */ }
+  }
+  if (!service && allServices.length > 0) {
+    service = allServices[0];
+    btLog('Using first discovered service: ' + service.uuid);
+  }
+  if (!service) {
+    showToast('No printer service found. Is this a thermal printer?', 'warn');
+    resetPrinterBtn();
+    return;
+  }
+
+  // Discover characteristics
+  let chars = [];
+  try {
+    chars = await service.getCharacteristics();
+    btLog('Characteristics: ' + chars.map(c => c.uuid + (c.properties.write?' [W]':'') + (c.properties.writeWithoutResponse?' [WNR]':'')).join(' | '));
+  } catch(e) {
+    btLog('getCharacteristics failed: ' + e.message);
+    // Try each known char UUID individually
+    for (const uuid of PRINTER_CHAR_UUIDS) {
+      try {
+        const c = await service.getCharacteristic(uuid);
+        chars.push(c);
+        btLog('Got char directly: ' + uuid);
+        break;
+      } catch(e2) { /* try next */ }
+    }
+  }
+
+  // Pick the best writable characteristic
+  // Priority: known TX UUIDs first, then any writable char
+  btCharacteristic = null;
+  for (const txUuid of PRINTER_CHAR_UUIDS) {
+    const found = chars.find(c => c.uuid === txUuid);
+    if (found && (found.properties.write || found.properties.writeWithoutResponse)) {
+      btCharacteristic = found;
+      btLog('Using known TX char: ' + txUuid);
+      break;
+    }
+  }
+  if (!btCharacteristic) {
+    // Fall back: any char that can be written
+    btCharacteristic = chars.find(c => c.properties.write || c.properties.writeWithoutResponse);
+    if (btCharacteristic) btLog('Using fallback writable char: ' + btCharacteristic.uuid);
+  }
+
+  if (!btCharacteristic) {
+    showToast('No writable channel found on printer.', 'warn');
+    btLog('ERROR: No writable characteristic found among ' + chars.length + ' chars');
+    resetPrinterBtn();
+    return;
+  }
+
+  // Connected!
+  const name = btDevice.name || 'Thermal Printer';
+  btn.textContent = '✅ ' + name;
+  btn.classList.add('connected');
+  btn.disabled = false;
+  document.getElementById('printerStatusBar').style.display = 'block';
+  updateBtPrintHint();
+  showToast('✅ ' + name + ' connected!', 'success');
+  btLog('Ready to print via: ' + btCharacteristic.uuid);
+
+  btDevice.addEventListener('gattserverdisconnected', () => {
+    btCharacteristic = null;
+    btDevice = null;
+    resetPrinterBtn();
+    document.getElementById('printerStatusBar').style.display = 'none';
+    updateBtPrintHint();
+    showToast('Printer disconnected', 'warn');
+    btLog('Disconnected');
+  });
+}
+
+function resetPrinterBtn() {
+  const btn = document.getElementById('btBtn');
+  btn.textContent = '🖨️ Connect Printer';
+  btn.classList.remove('connected');
+  btn.disabled = false;
+}
+
+/* ═══════════════════════════════════════════
+   ESC/POS RECEIPT BUILDER
+   58mm paper = 32 chars wide
+═══════════════════════════════════════════ */
+function buildEscPos(bill) {
+  const enc = new TextEncoder();
+  const chunks = [];
+  const ESC = 0x1B, GS = 0x1D, LF = 0x0A;
+
+  const raw  = (...bytes) => chunks.push(new Uint8Array(bytes));
+  const text = (str) => chunks.push(enc.encode(str));
+  const nl   = () => chunks.push(new Uint8Array([LF]));
+  const line = (str) => { text(str); nl(); };
+
+  // 58mm = 32 chars per line
+  const W = 32;
+  const pad  = (s, n) => String(s).substring(0, n).padEnd(n);
+  const rpad = (s, n) => String(s).substring(0, n).padStart(n);
+  const divider = () => line('-'.repeat(W));
+
+  // Initialize printer
+  raw(ESC, 0x40);              // ESC @ — full reset
+  raw(ESC, 0x74, 0x00);       // Character code page: PC437
+  raw(GS,  0x61, 0x00);       // Disable ASB (status back)
+
+  // Store name — center, double-height
+  raw(ESC, 0x61, 0x01);       // Center align
+  raw(ESC, 0x21, 0x10);       // Double height
+  line('Rajeshwari Medical');
+  raw(ESC, 0x21, 0x00);       // Normal size
+  line('& General Store');
+  nl();
+
+  // Bill info — left align
+  raw(ESC, 0x61, 0x00);
+  divider();
+  line('Bill  : ' + bill.billId);
+  line('Date  : ' + bill.date);
+  line('Pt    : ' + (bill.patient || 'Walk-in').substring(0, 22));
+  if (bill.doctor && bill.doctor !== '—') {
+    line('Dr.   : ' + bill.doctor.substring(0, 23));
+  }
+  divider();
+
+  // Table header — 58mm layout: Name(16) Qty(4) Amt(12)
+  line(pad('Item', 16) + pad('Qty', 5) + rpad('Amt', 11));
+  divider();
+
+  bill.items.forEach(item => {
+    const name   = item.name.substring(0, 16);
+    const qty    = String(item.qty).padStart(4) + ' ';
+    const amount = ('Rs' + (item.price * item.qty).toFixed(2)).padStart(11);
+
+    // If name is long, wrap it
+    if (item.name.length > 16) {
+      line(name);
+      line(' '.repeat(16) + qty + amount);
+      // Print full name on second line
+      line('  ' + item.name.substring(16, 30));
+    } else {
+      line(name + qty + amount);
+    }
+  });
+
+  divider();
+
+  const sub      = bill.sub.toFixed(2);
+  const discount = (bill.discount != null ? bill.discount : bill.sub * 0.03).toFixed(2);
+  const total    = bill.total.toFixed(2);
+
+  line(pad('Subtotal:', W - 12) + ('Rs' + sub).padStart(12));
+  line(pad('Discount(3%):', W - 12) + ('-Rs' + discount).padStart(12));
+  divider();
+
+  // Total — bold / double height
+  raw(ESC, 0x21, 0x30);       // Bold + double height
+  line(pad('TOTAL:', W - 14)  + ('Rs' + total).padStart(14));
+  raw(ESC, 0x21, 0x00);       // Normal
+
+  divider();
+  raw(ESC, 0x61, 0x01);       // Center
+  line('By: ' + (bill.generatedBy || ''));
+  line('Thank you! Come again.');
+  nl();
+  nl();
+  nl();
+
+  // Cut paper (full cut)
+  raw(GS, 0x56, 0x00);        // GS V 0 — full cut
+
+  // Merge all chunks
+  const total_len = chunks.reduce((a, b) => a + b.length, 0);
+  const merged    = new Uint8Array(total_len);
+  let   offset    = 0;
+  chunks.forEach(c => { merged.set(c, offset); offset += c.length; });
+  return merged;
+}
+
+/* ═══════════════════════════════════════════
+   SEND TO PRINTER
+   58mm printers: max 100 bytes per chunk,
+   ~80ms gap between chunks for stability
+═══════════════════════════════════════════ */
+async function sendToPrinter(data) {
+  const CHUNK_SIZE = 100;  // Safe for most 58mm BT thermal printers
+  const DELAY_MS   = 80;   // Gap between chunks
+
+  btLog('Sending ' + data.length + ' bytes in ' + Math.ceil(data.length / CHUNK_SIZE) + ' chunks...');
+
+  for (let i = 0; i < data.length; i += CHUNK_SIZE) {
+    const slice = data.slice(i, i + CHUNK_SIZE);
+    try {
+      if (btCharacteristic.properties.writeWithoutResponse) {
+        await btCharacteristic.writeValueWithoutResponse(slice);
+      } else {
+        await btCharacteristic.writeValue(slice);
+      }
+    } catch(e) {
+      btLog('Write error at byte ' + i + ': ' + e.message);
+      throw e;
+    }
+    await new Promise(r => setTimeout(r, DELAY_MS));
+  }
+  btLog('All data sent successfully!');
+}
+
+/* ═══════════════════════════════════════════
+   PRINT ACTIONS
+═══════════════════════════════════════════ */
+function updateBtPrintHint() {
+  const btn  = document.getElementById('btPrintBtn');
+  const hint = document.getElementById('btPrintHint');
+  if (!btn || !hint) return;
+  if (btCharacteristic) {
+    btn.disabled = false;
+    btn.classList.add('connected');
+    btn.textContent = '📡 Bluetooth Print';
+    const name = btDevice && btDevice.name ? btDevice.name : 'Printer';
+    hint.innerHTML = '<span style="color:var(--green);font-weight:500">✅ ' + name + ' ready</span>';
+  } else {
+    btn.disabled = true;
+    btn.classList.remove('connected');
+    btn.textContent = '📡 Bluetooth Print';
+    hint.innerHTML = 'Not connected — <a href="#" onclick="event.preventDefault();connectBTPrinter();" style="color:var(--blue);font-weight:500">Connect Printer</a>';
+  }
+}
+
+async function doBTPrint() {
+  if (!btCharacteristic) {
+    showToast('Connect a Bluetooth printer first', 'warn');
+    return;
+  }
+  const bills = STORE.get('ms_bills') || [];
+  if (!bills.length) { showToast('No bill to print', 'warn'); return; }
+
+  const bill = bills[0];  // most recent bill
+  const btn = document.getElementById('btPrintBtn');
+  btn.textContent = '⏳ Printing...';
+  btn.disabled = true;
+
+  // Clear debug log for this print job
+  const log = document.getElementById('btDebugLog');
+  if (log) { log.innerHTML = ''; log.style.display = 'block'; }
+
+  try {
+    const data = buildEscPos(bill);
+    await sendToPrinter(data);
+    showToast('✅ Receipt sent to printer!', 'success');
+    btn.textContent = '✅ Printed!';
+    setTimeout(() => updateBtPrintHint(), 3000);
+  } catch(e) {
+    console.warn('BT print error:', e);
+    btLog('PRINT FAILED: ' + e.message);
+    showToast('Print failed: ' + (e.message || 'unknown error'), 'error');
+    // Reset connection state
+    btCharacteristic = null;
+    btDevice = null;
+    resetPrinterBtn();
+    document.getElementById('printerStatusBar').style.display = 'none';
+    updateBtPrintHint();
+  }
+}
+
+function doBrowserPrint() {
+  setTimeout(() => window.print(), 150);
+}
+
+/* Toast notification */
+let _toastTimer = null;
+function showToast(msg, type) {
+  const colors = { success:'#1a7a4a', error:'#c0392b', warn:'#e67e22' };
+  const bg = colors[type] || colors.success;
+  let t = document.getElementById('toastMsg');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'toastMsg';
+    t.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%);color:white;padding:12px 24px;border-radius:10px;font-size:14px;font-weight:500;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.2);transition:opacity 0.4s;opacity:0';
+    document.body.appendChild(t);
+  }
+  if (_toastTimer) clearTimeout(_toastTimer);
+  t.style.background = bg;
+  t.textContent = msg;
+  t.style.opacity = '1';
+  _toastTimer = setTimeout(() => { t.style.opacity = '0'; }, 3500);
+}
+
+/* ═══════════════════════════════════════════
+   AUTH
+═══════════════════════════════════════════ */
 function doLogin(){
   const u = document.getElementById('loginUser').value.trim();
   const p = document.getElementById('loginPass').value;
@@ -497,16 +826,21 @@ function doLogin(){
     document.getElementById('loginError').style.display='block';
   }
 }
+
 function doLogout(){
   currentUser = null; cart = [];
+  btDevice = null; btCharacteristic = null;
+  resetPrinterBtn();
+  document.getElementById('printerStatusBar').style.display = 'none';
   document.getElementById('appScreen').style.display='none';
   document.getElementById('loginScreen').style.display='flex';
   document.querySelectorAll('.nav-tab').forEach((t,i)=>t.classList.toggle('active',i===0));
   document.querySelectorAll('.page').forEach((p,i)=>p.classList.toggle('active',i===0));
 }
 
-
-// ── TABS ──
+/* ═══════════════════════════════════════════
+   TABS
+═══════════════════════════════════════════ */
 function switchTab(tab, el){
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
@@ -517,7 +851,9 @@ function switchTab(tab, el){
   if(tab==='admin')   renderAdminPanel();
 }
 
-// ── ADMIN ──
+/* ═══════════════════════════════════════════
+   ADMIN
+═══════════════════════════════════════════ */
 function renderAdminPanel(){
   const users = STORE.get('ms_users')||{};
   const roles = STORE.get('ms_roles')||{};
@@ -527,7 +863,6 @@ function renderAdminPanel(){
   document.getElementById('aStatUsers').textContent  = names.length;
   document.getElementById('aStatAdmins').textContent = admins.length;
   document.getElementById('aStatStaff').textContent  = staff.length;
-
   const tbody = document.getElementById('userList');
   tbody.innerHTML = '';
   names.forEach((u,i)=>{
@@ -551,9 +886,7 @@ function renderAdminPanel(){
           <option value="admin" ${role==='admin'?'selected':''}>Admin</option>
         </select>
       </td>
-      <td>
-        <button class="btn-sm btn-danger" onclick="deleteUser('${u}')" ${isSelf||isOnlyAdmin?'disabled style="opacity:0.4;cursor:not-allowed"':''} title="${isSelf?'Cannot delete yourself':isOnlyAdmin?'Cannot delete the only admin':'Delete user'}">Delete</button>
-      </td>`;
+      <td><button class="btn-sm btn-danger" onclick="deleteUser('${u}')" ${isSelf||isOnlyAdmin?'disabled style="opacity:0.4;cursor:not-allowed"':''}>Delete</button></td>`;
     tbody.appendChild(tr);
   });
   renderStaffActivity();
@@ -580,19 +913,19 @@ function adminCreateUser(){
 
 function changePassword(u){
   const pw = document.getElementById('pw_'+u).value;
-  if(!pw){ alert('Enter a new password'); return; }
-  if(pw.length<4){ alert('Password must be at least 4 characters'); return; }
+  if(!pw){ showToast('Enter a new password', 'warn'); return; }
+  if(pw.length<4){ showToast('Password must be at least 4 characters', 'warn'); return; }
   let users = STORE.get('ms_users')||{};
   users[u]=pw; STORE.set('ms_users',users);
   document.getElementById('pw_'+u).value='';
-  alert(`Password updated for "${u}"`);
+  showToast(`Password updated for "${u}"`, 'success');
 }
 
 function changeRole(u, newRole){
   const roles = STORE.get('ms_roles')||{};
   const admins = Object.keys(roles).filter(k=>roles[k]==='admin');
   if(roles[u]==='admin' && admins.length===1 && newRole==='staff'){
-    alert('Cannot demote the only admin account.');
+    showToast('Cannot demote the only admin account.', 'warn');
     document.getElementById('role_'+u).value='admin'; return;
   }
   roles[u]=newRole; STORE.set('ms_roles',roles);
@@ -603,7 +936,7 @@ function deleteUser(u){
   if(!confirm(`Delete user "${u}"? This cannot be undone.`)) return;
   const roles = STORE.get('ms_roles')||{};
   const admins = Object.keys(roles).filter(k=>roles[k]==='admin');
-  if(roles[u]==='admin' && admins.length===1){ alert('Cannot delete the only admin.'); return; }
+  if(roles[u]==='admin' && admins.length===1){ showToast('Cannot delete the only admin.', 'warn'); return; }
   let users = STORE.get('ms_users')||{};
   delete users[u]; STORE.set('ms_users',users);
   delete roles[u]; STORE.set('ms_roles',roles);
@@ -617,7 +950,6 @@ function renderStaffActivity(){
   const roles = STORE.get('ms_roles')||{};
   const userFilter = document.getElementById('activityUserFilter').value;
   const typeFilter = document.getElementById('activityTypeFilter').value;
-
   const sel = document.getElementById('activityUserFilter');
   const prev = sel.value;
   sel.innerHTML = '<option value="all">All Staff</option>';
@@ -627,34 +959,14 @@ function renderStaffActivity(){
     sel.appendChild(opt);
   });
   sel.value=prev;
-
   let activities = [];
-  if(typeFilter!=='bill'){
-    meds.forEach(m=>{
-      activities.push({ type:'medicine', user:m.addedBy||'Unknown', details:m.name, extra:'₹'+parseFloat(m.price).toFixed(2), date:m.addedOn||'—', ts:m.id||0 });
-    });
-  }
-  if(typeFilter!=='medicine'){
-    bills.forEach(b=>{
-      activities.push({ type:'bill', user:b.generatedBy||'Unknown', details:b.billId+' — '+b.patient+' ('+b.items.length+' item'+(b.items.length>1?'s':'')+')', extra:'₹'+b.total.toFixed(2), date:b.date, ts:parseInt(b.billId.replace('RX-',''))||0 });
-    });
-  }
+  if(typeFilter!=='bill') meds.forEach(m=>{ activities.push({ type:'medicine', user:m.addedBy||'Unknown', details:m.name, extra:'₹'+parseFloat(m.price).toFixed(2), date:m.addedOn||'—', ts:m.id||0 }); });
+  if(typeFilter!=='medicine') bills.forEach(b=>{ activities.push({ type:'bill', user:b.generatedBy||'Unknown', details:b.billId+' — '+b.patient+' ('+b.items.length+' item'+(b.items.length>1?'s':'')+')', extra:'₹'+b.total.toFixed(2), date:b.date, ts:parseInt(b.billId.replace('RX-',''))||0 }); });
   if(userFilter!=='all') activities = activities.filter(a=>a.user===userFilter);
   activities.sort((a,b)=>b.ts-a.ts);
-
   const summaryMap = {};
-  (STORE.get('ms_medicines')||[]).forEach(m=>{
-    const u=m.addedBy||'Unknown';
-    if(!summaryMap[u]) summaryMap[u]={meds:0,bills:0,revenue:0};
-    summaryMap[u].meds++;
-  });
-  (STORE.get('ms_bills')||[]).forEach(b=>{
-    const u=b.generatedBy||'Unknown';
-    if(!summaryMap[u]) summaryMap[u]={meds:0,bills:0,revenue:0};
-    summaryMap[u].bills++;
-    summaryMap[u].revenue+=b.total;
-  });
-
+  meds.forEach(m=>{ const u=m.addedBy||'Unknown'; if(!summaryMap[u]) summaryMap[u]={meds:0,bills:0,revenue:0}; summaryMap[u].meds++; });
+  bills.forEach(b=>{ const u=b.generatedBy||'Unknown'; if(!summaryMap[u]) summaryMap[u]={meds:0,bills:0,revenue:0}; summaryMap[u].bills++; summaryMap[u].revenue+=b.total; });
   const summaryDiv = document.getElementById('staffSummaryCards');
   const filteredUsers = userFilter==='all' ? Object.keys(summaryMap) : [userFilter];
   summaryDiv.innerHTML = filteredUsers.length===0 ? '' : filteredUsers.map(u=>{
@@ -672,7 +984,6 @@ function renderStaffActivity(){
       </div>
     </div>`;
   }).join('');
-
   const tbody = document.getElementById('activityList');
   tbody.innerHTML='';
   document.getElementById('activityEmpty').style.display = activities.length ? 'none' : 'block';
@@ -683,8 +994,7 @@ function renderStaffActivity(){
       <td><span class="status-pill ${isMed?'status-safe':'status-warning'}">${isMed?'💊 Medicine':'🧾 Bill'}</span></td>
       <td><div style="display:flex;align-items:center;gap:8px">
         <div style="width:28px;height:28px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--green)">${(a.user||'?')[0].toUpperCase()}</div>
-        <span style="font-weight:500">${a.user}</span>
-      </div></td>
+        <span style="font-weight:500">${a.user}</span></div></td>
       <td style="color:var(--text)">${a.details}</td>
       <td style="font-weight:600;color:${isMed?'var(--muted)':'var(--green)'}">${a.extra}</td>
       <td style="color:var(--muted);font-size:13px">${a.date}</td>`;
@@ -692,26 +1002,27 @@ function renderStaffActivity(){
   });
 }
 
-// ── INVENTORY ──
+/* ═══════════════════════════════════════════
+   INVENTORY
+═══════════════════════════════════════════ */
 function getMeds(){ return STORE.get('ms_medicines')||[]; }
 function saveMeds(m){ STORE.set('ms_medicines',m); }
 
-// 4-level status: expired | warning (≤6m) | year (6–12m) | safe (>12m)
 function getStatus(expiry){
   const today = new Date(); today.setHours(0,0,0,0);
   const exp   = new Date(expiry);
   const days  = Math.ceil((exp-today)/(1000*60*60*24));
-  if(days < 0)   return { text:'Expired',                  cls:'status-expired', key:'expired'  };
-  if(days <= 180) return { text:'Expiring Soon ('+days+'d)', cls:'status-warning', key:'warning'  };
-  if(days <= 365) return { text:'~'+(Math.ceil(days/30))+'mo left', cls:'status-year',    key:'year'     };
-  return               { text:'Good',                      cls:'status-safe',    key:'safe'     };
+  if(days < 0)    return { text:'Expired',                    cls:'status-expired', key:'expired'  };
+  if(days <= 180) return { text:'Expiring Soon ('+days+'d)',  cls:'status-warning', key:'warning'  };
+  if(days <= 365) return { text:'~'+(Math.ceil(days/30))+'mo left', cls:'status-year', key:'year' };
+  return               { text:'Good',                         cls:'status-safe',    key:'safe'     };
 }
 
 function addMedicine(){
   const name   = document.getElementById('medName').value.trim();
   const expiry = document.getElementById('expiryDate').value;
   const price  = parseFloat(document.getElementById('medPrice').value);
-  if(!name||!expiry||isNaN(price)||price<0){ alert('Please fill all fields correctly'); return; }
+  if(!name||!expiry||isNaN(price)||price<0){ showToast('Please fill all fields correctly', 'warn'); return; }
   const meds = getMeds();
   meds.push({ id:Date.now(), name, expiry, price, addedBy:currentUser, addedOn:new Date().toLocaleDateString('en-IN') });
   saveMeds(meds);
@@ -733,26 +1044,14 @@ function renderInventory(){
   const filter = document.getElementById('filterStatus')?.value||'all';
   const tbody  = document.getElementById('medList');
   tbody.innerHTML='';
-
   let expired=0, warning=0, yearCount=0, good=0;
-  meds.forEach(m=>{
-    const s=getStatus(m.expiry);
-    if(s.key==='expired') expired++;
-    else if(s.key==='warning') warning++;
-    else if(s.key==='year') yearCount++;
-    else good++;
-  });
+  meds.forEach(m=>{ const s=getStatus(m.expiry); if(s.key==='expired') expired++; else if(s.key==='warning') warning++; else if(s.key==='year') yearCount++; else good++; });
   document.getElementById('statTotal').textContent   = meds.length;
   document.getElementById('statExpired').textContent = expired;
   document.getElementById('statWarning').textContent = warning;
   document.getElementById('statYear').textContent    = yearCount;
   document.getElementById('statGood').textContent    = good;
-
-  const filtered = meds.filter(m=>{
-    const s = getStatus(m.expiry);
-    return m.name.toLowerCase().includes(search) && (filter==='all'||s.key===filter);
-  });
-
+  const filtered = meds.filter(m=>{ const s = getStatus(m.expiry); return m.name.toLowerCase().includes(search) && (filter==='all'||s.key===filter); });
   document.getElementById('invEmpty').style.display = filtered.length ? 'none' : 'block';
   filtered.forEach((m,i)=>{
     const s = getStatus(m.expiry);
@@ -763,52 +1062,40 @@ function renderInventory(){
       <td>${m.expiry}</td>
       <td>₹${parseFloat(m.price).toFixed(2)}</td>
       <td><span class="status-pill ${s.cls}">${s.text}</span></td>
-      <td><button class="btn-sm btn-danger" onclick="deleteMedicine(${m.id})">Remove</button></td>
-    `;
+      <td><button class="btn-sm btn-danger" onclick="deleteMedicine(${m.id})">Remove</button></td>`;
     tbody.appendChild(tr);
   });
 }
 
-// ── BILLING ──
+/* ═══════════════════════════════════════════
+   BILLING
+═══════════════════════════════════════════ */
 function renderBillDropdown(){
   const sel  = document.getElementById('billMedSelect');
   const meds = getMeds().filter(m=>getStatus(m.expiry).key!=='expired');
   sel.innerHTML = '<option value="">-- Choose medicine --</option>';
-  meds.forEach(m=>{
-    const opt = document.createElement('option');
-    opt.value = m.id;
-    opt.textContent = `${m.name} — ₹${parseFloat(m.price).toFixed(2)}`;
-    sel.appendChild(opt);
-  });
+  meds.forEach(m=>{ const opt = document.createElement('option'); opt.value = m.id; opt.textContent = `${m.name} — ₹${parseFloat(m.price).toFixed(2)}`; sel.appendChild(opt); });
 }
 
 function addToBill(){
   const id  = parseInt(document.getElementById('billMedSelect').value);
   const qty = parseInt(document.getElementById('billQty').value)||1;
-  if(!id){ alert('Select a medicine'); return; }
+  if(!id){ showToast('Select a medicine', 'warn'); return; }
   const med = getMeds().find(m=>m.id===id);
   if(!med) return;
   const existing = cart.find(c=>c.id===id);
-  if(existing){ existing.qty+=qty; }
-  else { cart.push({ id:med.id, name:med.name, price:med.price, qty }); }
+  if(existing){ existing.qty+=qty; } else { cart.push({ id:med.id, name:med.name, price:med.price, qty }); }
   renderCart();
 }
 
 function renderCart(){
   const container = document.getElementById('cartItems');
-  if(!cart.length){
-    container.innerHTML=`<div class="empty-state" style="padding:24px"><div class="icon">🛒</div><p>No items added yet</p></div>`;
-    updateBillTotals(0); return;
-  }
+  if(!cart.length){ container.innerHTML=`<div class="empty-state" style="padding:24px"><div class="icon">🛒</div><p>No items added yet</p></div>`; updateBillTotals(0); return; }
   let html='', sub=0;
   cart.forEach((item,i)=>{
-    const lineTotal = item.price*item.qty;
-    sub+=lineTotal;
+    const lineTotal = item.price*item.qty; sub+=lineTotal;
     html+=`<div class="cart-item">
-      <div>
-        <div class="cart-name">${item.name}</div>
-        <div class="cart-price">₹${parseFloat(item.price).toFixed(2)} each · ₹${lineTotal.toFixed(2)} total</div>
-      </div>
+      <div><div class="cart-name">${item.name}</div><div class="cart-price">₹${parseFloat(item.price).toFixed(2)} each · ₹${lineTotal.toFixed(2)} total</div></div>
       <div class="cart-qty">
         <button class="qty-btn" onclick="changeQty(${i},-1)">−</button>
         <span class="qty-val">${item.qty}</span>
@@ -834,27 +1121,23 @@ function updateBillTotals(sub){
 }
 
 function generateBill(){
-  if(!cart.length){ alert('Add medicines to the bill first'); return; }
-  const patient  = document.getElementById('patientName').value.trim()||'Walk-in Customer';
+  if(!cart.length){ showToast('Add medicines to the bill first', 'warn'); return; }
+  const patient  = document.getElementById('patientName').value.trim()||'Walk-in';
   const doctor   = document.getElementById('doctorRef').value.trim()||'—';
   const sub      = cart.reduce((a,c)=>a+c.price*c.qty,0);
   const discount = sub*0.03;
   const total    = sub-discount;
   const billId   = 'RX-'+Date.now().toString().slice(-6);
   const date     = new Date().toLocaleString('en-IN');
-
   const bill = { billId, patient, doctor, date, items:JSON.parse(JSON.stringify(cart)), sub, discount, total, generatedBy:currentUser };
   const history = STORE.get('ms_bills')||[];
   history.unshift(bill);
   STORE.set('ms_bills',history);
-
   showReceipt(bill);
-  // Cart is intentionally kept until user explicitly starts new bill
 }
 
 function showReceipt(bill){
   const discount = bill.discount != null ? bill.discount : (bill.sub * 0.03);
-  const total    = bill.total;
   let rows = bill.items.map(item=>`
     <tr>
       <td>${item.name}</td>
@@ -862,7 +1145,6 @@ function showReceipt(bill){
       <td style="text-align:right">₹${parseFloat(item.price).toFixed(2)}</td>
       <td style="text-align:right">₹${(item.price*item.qty).toFixed(2)}</td>
     </tr>`).join('');
-
   document.getElementById('receiptContent').innerHTML = `
     <div class="receipt-header">
       <h2>💊 Rajeshwari Medical</h2>
@@ -879,39 +1161,32 @@ function showReceipt(bill){
     </table>
     <div style="text-align:right;font-size:13px;color:var(--muted)">Subtotal: ₹${bill.sub.toFixed(2)}</div>
     <div style="text-align:right;font-size:13px;color:var(--green)">Discount (3%): -₹${discount.toFixed(2)}</div>
-    <div class="receipt-total">Total: ₹${total.toFixed(2)}</div>
-    <div class="receipt-footer">
-      Served by: ${bill.generatedBy} &nbsp;|&nbsp; Thank you for your visit!<br>
-      <span style="font-size:10px">Please preserve this receipt for reference</span>
-    </div>`;
-  document.getElementById('receiptModal').classList.add('open');
-}
+    <div class="receipt-total">Total: ₹${bill.total.toFixed(2)}</div>
+    <div class="receipt-footer">Served by: ${bill.generatedBy} &nbsp;|&nbsp; Thank you for your visit!<br><span style="font-size:10px">Please preserve this receipt for reference</span></div>`;
 
-function printReceipt(){
-  // Ensure modal has open class before printing
+  // Clear old debug log
+  const log = document.getElementById('btDebugLog');
+  if (log) { log.innerHTML = ''; log.style.display = 'none'; }
+
   document.getElementById('receiptModal').classList.add('open');
-  setTimeout(()=>{ window.print(); }, 100);
+  updateBtPrintHint();
 }
 
 function closeReceipt(){
   document.getElementById('receiptModal').classList.remove('open');
 }
 
-// New Bill: close modal AND clear the current cart + form fields
 function startNewBill(){
   closeReceipt();
   cart=[];
   renderCart();
   document.getElementById('patientName').value='';
   document.getElementById('doctorRef').value='';
-  // Switch to billing tab visually in case called from history
-  const billingTab = document.querySelector('.nav-tab:nth-child(2)');
-  if(billingTab && !document.getElementById('page-billing').classList.contains('active')){
-    switchTab('billing', billingTab);
-  }
 }
 
-// ── HISTORY ──
+/* ═══════════════════════════════════════════
+   HISTORY
+═══════════════════════════════════════════ */
 function renderHistory(){
   const bills = STORE.get('ms_bills')||[];
   const container = document.getElementById('billHistoryList');
@@ -920,11 +1195,7 @@ function renderHistory(){
   document.getElementById('hStatBills').textContent = bills.length;
   document.getElementById('hStatRev').textContent   = '₹'+total.toFixed(0);
   document.getElementById('hStatAvg').textContent   = '₹'+avg.toFixed(0);
-
-  if(!bills.length){
-    container.innerHTML=`<div class="empty-state"><div class="icon">📋</div><p>No bills generated yet</p></div>`;
-    return;
-  }
+  if(!bills.length){ container.innerHTML=`<div class="empty-state"><div class="icon">📋</div><p>No bills generated yet</p></div>`; return; }
   container.innerHTML = bills.map(b=>`
     <div class="bill-record">
       <div>
@@ -938,12 +1209,9 @@ function renderHistory(){
     </div>`).join('');
 }
 
-// ── ENTER KEY ──
+/* Keyboard shortcut */
 document.addEventListener('keydown', e=>{
-  if(e.key==='Enter'){
-    const ls = document.getElementById('loginScreen');
-    if(ls && ls.style.display!=='none') doLogin();
-  }
+  if(e.key==='Enter'){ const ls = document.getElementById('loginScreen'); if(ls && ls.style.display!=='none') doLogin(); }
 });
 </script>
 </body>
