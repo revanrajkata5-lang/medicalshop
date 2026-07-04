@@ -205,6 +205,10 @@
     .modal-actions{display:none!important;}
   }
 </style>
+
+<!-- Firebase — used to store medicine inventory online instead of localStorage -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -490,6 +494,40 @@ const STORE = {
   set(k,v){ localStorage.setItem(k,JSON.stringify(v)); }
 };
 
+/* ═══════════════════════════════════════════════════
+   FIREBASE — ONLINE MEDICINE STORAGE
+   Fill in your project's config below (see setup guide).
+   Users/roles/bills stay in localStorage for now — only
+   the medicine inventory is synced online.
+═══════════════════════════════════════════════════ */
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const medsDocRef = db.collection('pharmacy_data').doc('medicines');
+
+let medsCache = [];
+
+// Live sync: whenever the "medicines" document changes — from THIS device
+// or from any other device/browser open on this same Firebase project —
+// this fires and every open view refreshes automatically.
+medsDocRef.onSnapshot(snap=>{
+  medsCache = (snap.exists() && Array.isArray(snap.data().list)) ? snap.data().list : [];
+  if(document.getElementById('page-inventory')?.classList.contains('active')) renderInventory();
+  if(document.getElementById('page-shortage')?.classList.contains('active')) renderShortage();
+  renderShortageBadge();
+}, err=>{
+  console.error('Firestore sync error:', err);
+  showToast('⚠️ Could not connect to online medicine storage','error');
+});
+
 (function initUsers(){
   let users = STORE.get('ms_users')||{};
   let roles = STORE.get('ms_roles')||{};
@@ -739,8 +777,14 @@ function renderStaffActivity(){
 /* ═══════════════════════════════════════════════════
    INVENTORY
 ═══════════════════════════════════════════════════ */
-function getMeds(){ return STORE.get('ms_medicines')||[]; }
-function saveMeds(m){ STORE.set('ms_medicines',m); }
+function getMeds(){ return medsCache; }
+function saveMeds(m){
+  medsCache = m; // update immediately so the UI feels instant
+  medsDocRef.set({list:m}).catch(err=>{
+    console.error('Failed to save medicines online:', err);
+    showToast('⚠️ Failed to save — check your internet connection','error');
+  });
+}
 
 function getExpiryStatus(expiry){
   const today=new Date(); today.setHours(0,0,0,0); const exp=new Date(expiry); const days=Math.ceil((exp-today)/(1000*60*60*24));
