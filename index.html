@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rajeshwari Medical — Pharmacy Management</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -185,6 +188,12 @@
   .bill-record:last-child{border-bottom:none;}
   #printerStatusBar{display:none;background:var(--green-light);color:var(--green);font-size:13px;font-weight:500;text-align:center;padding:6px;border-bottom:1px solid #b2ddc4;}
   .inv-input-row{display:grid;grid-template-columns:2fr 1.2fr 0.8fr 0.8fr 0.8fr auto;gap:10px;align-items:end;}
+  .inv-input-row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end;margin-top:10px;}
+  .schedule-pill{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0.3px;}
+  .schedule-h{background:#fef3e2;color:#e67e22;}
+  .schedule-h1{background:#fdecea;color:#c0392b;}
+  .schedule-x{background:#ede9fe;color:#7c3aed;}
+  .schedule-none{background:#f1f5f9;color:#64748b;}
 
   /* ── STOCK DEDUCTION NOTICE ── */
   .stock-deduct-notice{background:var(--amber-light);border:1px solid #f5cba7;border-radius:8px;padding:10px 14px;font-size:13px;color:var(--amber);margin-top:12px;display:none;}
@@ -194,6 +203,7 @@
     .stats-row{grid-template-columns:repeat(2,1fr);}
     .billing-grid{grid-template-columns:1fr;}
     .inv-input-row{grid-template-columns:1fr 1fr;}.inv-input-row .btn-add{grid-column:span 2;}
+    .inv-input-row2{grid-template-columns:1fr 1fr;}
     .topbar-right{gap:6px;}
     .btn-printer{font-size:12px;padding:6px 10px;}
   }
@@ -217,17 +227,17 @@
     </div>
     <h2>Welcome back</h2>
     <p>Sign in to manage your pharmacy</p>
-    <div class="login-error" id="loginError">Invalid username or password</div>
-    <div class="field"><label>Username</label><input type="text" id="loginUser" placeholder="Enter username" autocomplete="username"/></div>
+    <div class="login-error" id="loginError">Invalid email or password</div>
+    <div class="field"><label>Email</label><input type="email" id="loginUser" placeholder="you@example.com" autocomplete="username"/></div>
     <div class="field"><label>Password</label><input type="password" id="loginPass" placeholder="Enter password" autocomplete="current-password"/></div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;margin-top:-6px">
       <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;color:#4a6358;user-select:none">
-        <input type="checkbox" id="rememberMe" style="width:16px;height:16px;accent-color:#1a7a4a;cursor:pointer"/>
-        Remember me
+        <input type="checkbox" id="rememberMe" checked style="width:16px;height:16px;accent-color:#1a7a4a;cursor:pointer"/>
+        Stay signed in on this device
       </label>
-      <span id="savedUserHint" style="font-size:12px;color:#2fa365;display:none">✅ Credentials saved</span>
     </div>
     <button class="btn-primary" onclick="doLogin()">Sign In</button>
+    <div class="login-hint" style="margin-bottom:8px"><a href="#" onclick="event.preventDefault();doForgotPassword()" style="color:var(--green);font-weight:500">Forgot password?</a></div>
     <div class="login-hint">Contact your admin to get account access</div>
   </div>
 </div>
@@ -238,6 +248,7 @@
   <div class="topbar">
     <div class="topbar-logo">Rajeshwari Medical <span>& General Store</span></div>
     <div class="topbar-right">
+      <span id="syncStatus" style="font-size:12px;font-weight:500;color:var(--muted)">☁️ Connecting…</span>
       <button id="btBtn" class="btn-printer" onclick="connectBTPrinter()">🖨️ Connect Printer</button>
       <span class="topbar-user">👤 <span id="currentUserLabel"></span></span>
       <button class="btn-logout" onclick="doLogout()">Sign Out</button>
@@ -277,6 +288,17 @@
         <div class="form-group"><label>Price (₹)</label><input type="number" id="medPrice" placeholder="0.00" min="0" step="0.01"/></div>
         <button class="btn-add" onclick="addMedicine()">+ Add</button>
       </div>
+      <div class="inv-input-row2">
+        <div class="form-group"><label>Schedule Drug</label>
+          <select id="medSchedule">
+            <option value="none">— Not Scheduled</option>
+            <option value="H">Schedule H</option>
+            <option value="H1">Schedule H1</option>
+            <option value="X">Schedule X</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Batch Number</label><input type="text" id="medBatch" placeholder="e.g. B24A1123"/></div>
+      </div>
     </div>
     <div class="card">
       <div class="card-title">📦 Stock List
@@ -288,7 +310,7 @@
         </div>
       </div>
       <div class="search-row">
-        <input class="search-input" type="text" placeholder="🔍 Search by name, type, expiry..." id="searchInput" oninput="renderInventory()"/>
+        <input class="search-input" type="text" placeholder="🔍 Search by name, type, expiry, batch..." id="searchInput" oninput="renderInventory()"/>
         <select class="filter-select" id="filterStatus" onchange="renderInventory()">
           <option value="all">All Status</option>
           <option value="safe">Good (&gt;1yr)</option>
@@ -309,10 +331,17 @@
           <option value="ok">Low Stock</option>
           <option value="good">Good Stock</option>
         </select>
+        <select class="filter-select" id="filterSchedule" onchange="renderInventory()">
+          <option value="all">All Schedules</option>
+          <option value="H">Schedule H</option>
+          <option value="H1">Schedule H1</option>
+          <option value="X">Schedule X</option>
+          <option value="none">Not Scheduled</option>
+        </select>
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>#</th><th>Medicine Name</th><th>Type</th><th>Expiry</th><th>Quantity</th><th>Stock Level</th><th>Price</th><th>Expiry Status</th><th>Actions</th></tr></thead>
+          <thead><tr><th>#</th><th>Medicine Name</th><th>Type</th><th>Schedule</th><th>Batch No.</th><th>Expiry</th><th>Quantity</th><th>Stock Level</th><th>Price</th><th>Expiry Status</th><th>Actions</th></tr></thead>
           <tbody id="medList"></tbody>
         </table>
       </div>
@@ -397,9 +426,10 @@
     </div>
     <div class="card">
       <div class="card-title">➕ Create New User</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:end">
-        <div class="form-group"><label>Username</label><input type="text" id="newUserName" placeholder="Enter username"/></div>
-        <div class="form-group"><label>Password</label><input type="password" id="newUserPass" placeholder="Enter password"/></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:10px;align-items:end">
+        <div class="form-group"><label>Username</label><input type="text" id="newUserName" placeholder="Display name"/></div>
+        <div class="form-group"><label>Email</label><input type="email" id="newUserEmail" placeholder="staff@example.com"/></div>
+        <div class="form-group"><label>Password</label><input type="password" id="newUserPass" placeholder="Min 6 characters"/></div>
         <div class="form-group"><label>Role</label><select id="newUserRole"><option value="staff">Staff</option><option value="admin">Admin</option></select></div>
         <button class="btn-add" onclick="adminCreateUser()">+ Create</button>
       </div>
@@ -465,6 +495,15 @@
           <option value="other">📦 Other</option>
         </select>
       </div>
+      <div class="form-group"><label>Schedule Drug</label>
+        <select id="editSchedule">
+          <option value="none">— Not Scheduled</option>
+          <option value="H">Schedule H</option>
+          <option value="H1">Schedule H1</option>
+          <option value="X">Schedule X</option>
+        </select>
+      </div>
+      <div class="form-group edit-full"><label>Batch Number</label><input type="text" id="editBatch" placeholder="e.g. B24A1123"/></div>
       <div class="form-group"><label>Expiry Date</label><input type="date" id="editExpiry"/></div>
       <div class="form-group"><label>Current Qty</label><input type="number" id="editQtyCurrent" placeholder="0" disabled style="background:#f0f4f2"/></div>
       <div class="form-group"><label>Add Stock (+)</label><input type="number" id="editQtyAdd" placeholder="0" min="0"/></div>
@@ -472,7 +511,7 @@
       <div class="form-group"><label>Price (₹)</label><input type="number" id="editPrice" placeholder="0.00" min="0" step="0.01"/></div>
     </div>
     <div style="background:var(--amber-light);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--amber);margin-bottom:4px">
-      💡 <strong>Restock:</strong> Use "Add Stock" to add new units received. Or "Set Qty Directly" to override total.
+      💡 <strong>Restock:</strong> Use "Add Stock" to add new units received. Or "Set Qty Directly" to override total. Update the <strong>Batch Number</strong> whenever a new batch arrives.
     </div>
     <div class="edit-actions">
       <button class="btn-add" style="flex:1" onclick="saveEditMedicine()">💾 Save Changes</button>
@@ -481,17 +520,21 @@
   </div>
 </div>
 
-<script type="module">
+<script>
 /* ═══════════════════════════════════════════════════
-   FIREBASE — MODULAR SDK (v10, ES modules)
-   Medicine inventory syncs online via Firestore.
-   Users/roles/bills stay in localStorage.
+   STORAGE
 ═══════════════════════════════════════════════════ */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {
-  getFirestore, doc, onSnapshot, setDoc
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const STORE = {
+  get(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } },
+  set(k,v){ localStorage.setItem(k,JSON.stringify(v)); }
+};
 
+/* ═══════════════════════════════════════════════════
+   FIREBASE / FIRESTORE
+   localStorage stays as a fast local cache; Firestore
+   is the source of truth so data is shared across
+   devices/staff and backed up in the cloud.
+═══════════════════════════════════════════════════ */
 const firebaseConfig = {
   apiKey: "AIzaSyBO5bPVNoLbAb0XHonawg3uRqwAZMzL5Pk",
   authDomain: "medico-ce520.firebaseapp.com",
@@ -501,46 +544,86 @@ const firebaseConfig = {
   appId: "1:1057947361751:web:c68b5495114899ef8cab92"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const medsDocRef = doc(db, 'pharmacy_data', 'medicines');
+let db = null;
+let fsReady = false;
+try{
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.firestore();
+  fsReady = true;
+}catch(e){ console.error('Firebase init failed:', e); }
 
-let medsCache = [];
+function setSyncStatus(state){
+  // state: 'connected' | 'error' | 'offline'
+  const el = document.getElementById('syncStatus');
+  if(!el) return;
+  if(state==='connected'){ el.textContent='☁️ Synced'; el.style.color='var(--green)'; }
+  else if(state==='error'){ el.textContent='⚠️ Sync error'; el.style.color='var(--red)'; }
+  else { el.textContent='☁️ Offline'; el.style.color='var(--muted)'; }
+}
 
-// Live sync: whenever the "medicines" document changes — from THIS device
-// or from any other device/browser open on this same Firebase project —
-// this fires and every open view refreshes automatically.
-onSnapshot(medsDocRef, snap=>{
-  medsCache = (snap.exists() && Array.isArray(snap.data().list)) ? snap.data().list : [];
-  if(document.getElementById('page-inventory')?.classList.contains('active')) renderInventory();
-  if(document.getElementById('page-shortage')?.classList.contains('active')) renderShortage();
-  renderShortageBadge();
-}, err=>{
-  console.error('Firestore sync error:', err);
-  showToast('⚠️ Could not connect to online medicine storage','error');
-});
+function initFirestoreSync(){
+  if(!fsReady) return;
 
-/* ═══════════════════════════════════════════════════
-   STORAGE
-═══════════════════════════════════════════════════ */
-const STORE = {
-  get(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } },
-  set(k,v){ localStorage.setItem(k,JSON.stringify(v)); }
-};
+  db.collection('medicines').onSnapshot(snapshot=>{
+    const meds=[];
+    snapshot.forEach(doc=>meds.push(doc.data()));
+    meds.sort((a,b)=>(a.id||0)-(b.id||0));
+    STORE.set('ms_medicines',meds);
+    setSyncStatus('connected');
+    if(document.getElementById('appScreen') && document.getElementById('appScreen').style.display!=='none'){
+      const invPage=document.getElementById('page-inventory');
+      if(invPage&&invPage.classList.contains('active')) renderInventory();
+      const shortPage=document.getElementById('page-shortage');
+      if(shortPage&&shortPage.classList.contains('active')) renderShortage();
+      renderShortageBadge();
+    }
+  }, err=>{ console.error('Firestore medicines sync error:',err); setSyncStatus('error'); });
 
-(function initUsers(){
-  let users = STORE.get('ms_users')||{};
-  let roles = STORE.get('ms_roles')||{};
-  if(users['admin']==='admin123'){ delete users['admin']; delete roles['admin']; }
-  // Remove old admin if exists
-  if(users['Revanraj']){ delete users['Revanraj']; delete roles['Revanraj']; }
-  if(!users['KataSudhakar']){ users['KataSudhakar']='9985277365@s'; }
-  if(!roles['KataSudhakar']){ roles['KataSudhakar']='admin'; }
-  STORE.set('ms_users',users);
-  STORE.set('ms_roles',roles);
-})();
+  db.collection('bills').onSnapshot(snapshot=>{
+    const bills=[];
+    snapshot.forEach(doc=>bills.push(doc.data()));
+    bills.sort((a,b)=>(b._ts||0)-(a._ts||0));
+    STORE.set('ms_bills',bills);
+    if(document.getElementById('appScreen') && document.getElementById('appScreen').style.display!=='none'){
+      const histPage=document.getElementById('page-history');
+      if(histPage&&histPage.classList.contains('active')) renderHistory();
+    }
+  }, err=>{ console.error('Firestore bills sync error:',err); setSyncStatus('error'); });
+}
+
+function fsSetMedicine(med){
+  if(!fsReady) return;
+  db.collection('medicines').doc(String(med.id)).set(med).catch(e=>{ console.error('Save medicine to Firestore failed:',e); showToast('⚠️ Saved locally, but cloud sync failed','warn'); });
+}
+function fsDeleteMedicine(id){
+  if(!fsReady) return;
+  db.collection('medicines').doc(String(id)).delete().catch(e=>{ console.error('Delete medicine from Firestore failed:',e); showToast('⚠️ Removed locally, but cloud sync failed','warn'); });
+}
+function fsUpdateMedicineQty(id, qty){
+  if(!fsReady) return;
+  db.collection('medicines').doc(String(id)).update({qty}).catch(e=>{ console.error('Update qty in Firestore failed:',e); showToast('⚠️ Stock updated locally, but cloud sync failed','warn'); });
+}
+function fsSaveBill(bill){
+  if(!fsReady) return;
+  db.collection('bills').doc(bill.billId).set({...bill,_ts:Date.now()}).catch(e=>{ console.error('Save bill to Firestore failed:',e); showToast('⚠️ Bill saved locally, but cloud sync failed','warn'); });
+}
+
+let auth = null;
+try{ auth = firebase.auth(); }catch(e){ console.error('Firebase Auth init failed:',e); }
+
+function friendlyAuthError(e){
+  const code=e&&e.code||'';
+  if(code==='auth/invalid-email') return 'That email address looks invalid.';
+  if(code==='auth/user-not-found'||code==='auth/wrong-password'||code==='auth/invalid-credential') return 'Invalid email or password.';
+  if(code==='auth/too-many-requests') return 'Too many attempts. Please wait a bit and try again.';
+  if(code==='auth/email-already-in-use') return 'That email is already registered.';
+  if(code==='auth/weak-password') return 'Password must be at least 6 characters.';
+  return e&&e.message||'Something went wrong. Please try again.';
+}
 
 let currentUser = null;
+let currentUserUid = null;
+let currentUserRole = null;
 let cart = [];
 let selectedBillMed = null;
 let acIndex = -1;
@@ -574,6 +657,14 @@ function typeLabel(type){
 function typeCls(type){
   const map={tablet:'type-tablet',syrup:'type-syrup',injection:'type-injection',other:'type-other'};
   return map[type]||'type-other';
+}
+function scheduleLabel(s){
+  const map={H:'Schedule H',H1:'Schedule H1',X:'Schedule X'};
+  return map[s]||'—';
+}
+function scheduleCls(s){
+  const map={H:'schedule-h',H1:'schedule-h1',X:'schedule-x'};
+  return map[s]||'schedule-none';
 }
 
 /* ═══════════════════════════════════════════════════
@@ -622,7 +713,7 @@ function buildEscPos(bill){
   raw(ESC,0x61,0x01); raw(ESC,0x21,0x10); line('Rajeshwari Medical'); raw(ESC,0x21,0x00); line('& General Store'); nl();
   raw(ESC,0x61,0x00); divider(); line('Bill  : '+bill.billId); line('Date  : '+bill.date); line('Pt    : '+(bill.patient||'Walk-in').substring(0,22)); if(bill.doctor&&bill.doctor!=='—') line('Dr.   : '+bill.doctor.substring(0,23)); divider();
   line(pad('Item',16)+pad('Qty',5)+rpad('Amt',11)); divider();
-  bill.items.forEach(item=>{ const name=item.name.substring(0,16); const qty=String(item.qty).padStart(4)+' '; const amount=('Rs'+(item.price*item.qty).toFixed(2)).padStart(11); if(item.name.length>16){ line(name); line(' '.repeat(16)+qty+amount); line('  '+item.name.substring(16,30)); }else{ line(name+qty+amount); } });
+  bill.items.forEach(item=>{ const name=item.name.substring(0,16); const qty=String(item.qty).padStart(4)+' '; const amount=('Rs'+(item.price*item.qty).toFixed(2)).padStart(11); if(item.name.length>16){ line(name); line(' '.repeat(16)+qty+amount); line('  '+item.name.substring(16,30)); }else{ line(name+qty+amount); } if(item.batch){ line('  Batch: '+item.batch); } });
   divider();
   const sub=bill.sub.toFixed(2); const discount=(bill.discount!=null?bill.discount:bill.sub*0.03).toFixed(2); const total=bill.total.toFixed(2);
   line(pad('Subtotal:',W-12)+('Rs'+sub).padStart(12)); line(pad('Discount(3%):',W-12)+('-Rs'+discount).padStart(12)); divider();
@@ -667,37 +758,75 @@ function showToast(msg,type){
 /* ═══════════════════════════════════════════════════
    AUTH
 ═══════════════════════════════════════════════════ */
-function doLogin(){
-  const u=document.getElementById('loginUser').value.trim(); const p=document.getElementById('loginPass').value;
-  const users=STORE.get('ms_users')||{}; const roles=STORE.get('ms_roles')||{};
-  if(users[u]&&users[u]===p){
-    currentUser=u;
-    document.getElementById('currentUserLabel').textContent=u+' ('+(roles[u]||'staff')+')';
-    const isAdmin=(roles[u]||'staff')==='admin';
-    document.getElementById('adminTab').style.display=isAdmin?'block':'none';
-    document.getElementById('loginScreen').style.display='none';
-    document.getElementById('appScreen').style.display='block';
-    renderInventory(); renderHistory(); renderShortageBadge();
-    // Save or clear remembered credentials
-    if(document.getElementById('rememberMe').checked){
-      localStorage.setItem('ms_remember_user', u);
-      localStorage.setItem('ms_remember_pass', p);
-    } else {
-      localStorage.removeItem('ms_remember_user');
-      localStorage.removeItem('ms_remember_pass');
-    }
-    document.getElementById('loginUser').value=''; document.getElementById('loginPass').value=''; document.getElementById('loginError').style.display='none';
-  }else{ document.getElementById('loginError').style.display='block'; }
+async function doLogin(){
+  const email=document.getElementById('loginUser').value.trim();
+  const pass=document.getElementById('loginPass').value;
+  const errorEl=document.getElementById('loginError');
+  errorEl.style.display='none';
+  if(!auth){ errorEl.textContent='Cloud connection unavailable. Check your internet and reload.'; errorEl.style.display='block'; return; }
+  if(!email||!pass){ errorEl.textContent='Enter your email and password.'; errorEl.style.display='block'; return; }
+  const btn=document.querySelector('#loginScreen .btn-primary'); const oldText=btn.textContent; btn.textContent='Signing in…'; btn.disabled=true;
+  try{
+    const persistence = document.getElementById('rememberMe').checked ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION;
+    await auth.setPersistence(persistence);
+    await auth.signInWithEmailAndPassword(email, pass);
+    // onAuthStateChanged (below) picks up from here and shows the app
+  }catch(e){
+    errorEl.textContent=friendlyAuthError(e); errorEl.style.display='block';
+  }finally{
+    btn.textContent=oldText; btn.disabled=false;
+  }
+}
+
+function doForgotPassword(){
+  const email=document.getElementById('loginUser').value.trim();
+  if(!auth) return;
+  if(!email){ showToast('Enter your email above first, then click "Forgot password?"','warn'); return; }
+  auth.sendPasswordResetEmail(email).then(()=>{
+    showToast('Password reset email sent to '+email,'success');
+  }).catch(e=>{ showToast(friendlyAuthError(e),'error'); });
 }
 
 function doLogout(){
-  currentUser=null; cart=[]; selectedBillMed=null;
+  if(auth) auth.signOut();
+  cart=[]; selectedBillMed=null;
   btDevice=null; btCharacteristic=null; resetPrinterBtn();
   document.getElementById('printerStatusBar').style.display='none';
-  document.getElementById('appScreen').style.display='none';
-  document.getElementById('loginScreen').style.display='flex';
   document.querySelectorAll('.nav-tab').forEach((t,i)=>t.classList.toggle('active',i===0));
   document.querySelectorAll('.page').forEach((p,i)=>p.classList.toggle('active',i===0));
+}
+
+// ── Central auth state handler: fires on login, logout, and page reload ──
+if(auth){
+  auth.onAuthStateChanged(async user=>{
+    if(user){
+      try{
+        const doc = await db.collection('users').doc(user.uid).get();
+        if(!doc.exists){
+          showToast('This account is not authorized for this app. Contact your admin.','error');
+          await auth.signOut();
+          return;
+        }
+        const profile=doc.data();
+        currentUser=profile.username||user.email;
+        currentUserUid=user.uid;
+        currentUserRole=profile.role||'staff';
+        document.getElementById('currentUserLabel').textContent=currentUser+' ('+currentUserRole+')';
+        document.getElementById('adminTab').style.display=currentUserRole==='admin'?'block':'none';
+        document.getElementById('loginScreen').style.display='none';
+        document.getElementById('appScreen').style.display='block';
+        renderInventory(); renderHistory(); renderShortageBadge();
+        document.getElementById('loginUser').value=''; document.getElementById('loginPass').value=''; document.getElementById('loginError').style.display='none';
+      }catch(e){
+        console.error('Failed to load user profile:',e);
+        showToast('Could not load your profile. Try again.','error');
+      }
+    } else {
+      currentUser=null; currentUserUid=null; currentUserRole=null;
+      document.getElementById('appScreen').style.display='none';
+      document.getElementById('loginScreen').style.display='flex';
+    }
+  });
 }
 
 /* ═══════════════════════════════════════════════════
@@ -717,48 +846,95 @@ function switchTab(tab,el){
 /* ═══════════════════════════════════════════════════
    ADMIN
 ═══════════════════════════════════════════════════ */
-function renderAdminPanel(){
-  const users=STORE.get('ms_users')||{}; const roles=STORE.get('ms_roles')||{};
-  const names=Object.keys(users); const admins=names.filter(u=>(roles[u]||'staff')==='admin'); const staff=names.filter(u=>(roles[u]||'staff')==='staff');
-  document.getElementById('aStatUsers').textContent=names.length; document.getElementById('aStatAdmins').textContent=admins.length; document.getElementById('aStatStaff').textContent=staff.length;
+let usersCache = [];
+
+async function renderAdminPanel(){
+  try{
+    const snapshot = await db.collection('users').get();
+    usersCache = []; snapshot.forEach(d=>usersCache.push({uid:d.id, ...d.data()}));
+  }catch(e){ console.error('Failed to load users:',e); showToast('Could not load users list','error'); usersCache=[]; }
+  const admins=usersCache.filter(u=>u.role==='admin'); const staff=usersCache.filter(u=>u.role!=='admin');
+  document.getElementById('aStatUsers').textContent=usersCache.length;
+  document.getElementById('aStatAdmins').textContent=admins.length;
+  document.getElementById('aStatStaff').textContent=staff.length;
   const tbody=document.getElementById('userList'); tbody.innerHTML='';
-  names.forEach((u,i)=>{
-    const role=roles[u]||'staff'; const isSelf=u===currentUser; const isOnlyAdmin=role==='admin'&&admins.length===1;
+  usersCache.forEach((u,i)=>{
+    const isSelf=u.uid===currentUserUid; const isOnlyAdmin=u.role==='admin'&&admins.length===1;
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td style="color:var(--muted);font-size:12px">${i+1}</td><td style="font-weight:500">${u} ${isSelf?'<span style="background:var(--green-light);color:var(--green);font-size:11px;padding:2px 7px;border-radius:20px">you</span>':''}</td>
-      <td><span class="status-pill ${role==='admin'?'status-safe':'status-warning'}">${role}</span></td>
-      <td><div style="display:flex;gap:6px;align-items:center"><input type="password" placeholder="New password" id="pw_${u}" style="padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;width:150px;outline:none;font-family:inherit"/><button class="btn-sm btn-blue" onclick="changePassword('${u}')">Save</button></div></td>
-      <td><select id="role_${u}" style="padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;outline:none" onchange="changeRole('${u}',this.value)" ${isOnlyAdmin?'disabled':''}>
-        <option value="staff" ${role==='staff'?'selected':''}>Staff</option><option value="admin" ${role==='admin'?'selected':''}>Admin</option></select></td>
-      <td><button class="btn-sm btn-danger" onclick="deleteUser('${u}')" ${isSelf||isOnlyAdmin?'disabled style="opacity:0.4;cursor:not-allowed"':''}>Delete</button></td>`;
+    tr.innerHTML=`<td style="color:var(--muted);font-size:12px">${i+1}</td>
+      <td style="font-weight:500">${u.username||u.email} ${isSelf?'<span style="background:var(--green-light);color:var(--green);font-size:11px;padding:2px 7px;border-radius:20px">you</span>':''}<div style="font-size:11px;color:var(--muted);font-weight:400">${u.email||''}</div></td>
+      <td><span class="status-pill ${u.role==='admin'?'status-safe':'status-warning'}">${u.role}</span></td>
+      <td><button class="btn-sm btn-blue" onclick="adminSendReset('${u.email}')">✉️ Send Reset Link</button></td>
+      <td><select id="role_${u.uid}" style="padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;outline:none" onchange="changeRole('${u.uid}',this.value)" ${isOnlyAdmin?'disabled':''}>
+        <option value="staff" ${u.role==='staff'?'selected':''}>Staff</option><option value="admin" ${u.role==='admin'?'selected':''}>Admin</option></select></td>
+      <td><button class="btn-sm btn-danger" onclick="deleteUser('${u.uid}')" ${isSelf||isOnlyAdmin?'disabled style="opacity:0.4;cursor:not-allowed"':''}>Revoke Access</button></td>`;
     tbody.appendChild(tr);
   });
   renderStaffActivity();
 }
 
-function adminCreateUser(){
-  const u=document.getElementById('newUserName').value.trim(); const p=document.getElementById('newUserPass').value; const role=document.getElementById('newUserRole').value;
+async function adminCreateUser(){
+  const username=document.getElementById('newUserName').value.trim();
+  const email=document.getElementById('newUserEmail').value.trim();
+  const pass=document.getElementById('newUserPass').value;
+  const role=document.getElementById('newUserRole').value;
   const msg=document.getElementById('adminCreateMsg');
-  if(!u||!p){ msg.style.cssText='display:block;color:var(--red);background:var(--red-light);padding:8px 12px;border-radius:6px'; msg.textContent='Please fill username and password'; return; }
-  let users=STORE.get('ms_users')||{};
-  if(users[u]){ msg.style.cssText='display:block;color:var(--red);background:var(--red-light);padding:8px 12px;border-radius:6px'; msg.textContent='Username already exists'; return; }
-  users[u]=p; STORE.set('ms_users',users);
-  let roles=STORE.get('ms_roles')||{}; roles[u]=role; STORE.set('ms_roles',roles);
-  document.getElementById('newUserName').value=''; document.getElementById('newUserPass').value='';
-  msg.style.cssText='display:block;color:var(--green);background:var(--green-light);padding:8px 12px;border-radius:6px'; msg.textContent=`User "${u}" created as ${role}`;
-  setTimeout(()=>msg.style.display='none',3000); renderAdminPanel();
+  const showMsg=(text,ok)=>{ msg.style.cssText='display:block;color:'+(ok?'var(--green)':'var(--red)')+';background:'+(ok?'var(--green-light)':'var(--red-light)')+';padding:8px 12px;border-radius:6px'; msg.textContent=text; };
+  if(!username||!email||!pass){ showMsg('Please fill username, email and password'); return; }
+  if(pass.length<6){ showMsg('Password must be at least 6 characters'); return; }
+  if(!auth||!db){ showMsg('Cloud connection unavailable.'); return; }
+  const btn=event.target; const oldText=btn.textContent; btn.disabled=true; btn.textContent='Creating…';
+  let secondaryApp=null;
+  try{
+    // Use a secondary Firebase app instance so creating this user doesn't
+    // sign the current admin out of their own session.
+    secondaryApp=firebase.initializeApp(firebaseConfig,'Secondary-'+Date.now());
+    const secondaryAuth=secondaryApp.auth();
+    const cred=await secondaryAuth.createUserWithEmailAndPassword(email,pass);
+    await db.collection('users').doc(cred.user.uid).set({username,email,role,createdAt:new Date().toISOString()});
+    await secondaryAuth.signOut();
+    document.getElementById('newUserName').value=''; document.getElementById('newUserEmail').value=''; document.getElementById('newUserPass').value='';
+    showMsg(`User "${username}" created as ${role}`, true);
+    setTimeout(()=>msg.style.display='none',3000);
+    renderAdminPanel();
+  }catch(e){
+    showMsg(friendlyAuthError(e));
+  }finally{
+    if(secondaryApp){ try{ await secondaryApp.delete(); }catch(e2){} }
+    btn.disabled=false; btn.textContent=oldText;
+  }
 }
 
-function changePassword(u){ const pw=document.getElementById('pw_'+u).value; if(!pw){ showToast('Enter a new password','warn'); return; } if(pw.length<4){ showToast('Password must be at least 4 chars','warn'); return; } let users=STORE.get('ms_users')||{}; users[u]=pw; STORE.set('ms_users',users); document.getElementById('pw_'+u).value=''; showToast(`Password updated for "${u}"`,'success'); }
-function changeRole(u,r){ const roles=STORE.get('ms_roles')||{}; const admins=Object.keys(roles).filter(k=>roles[k]==='admin'); if(roles[u]==='admin'&&admins.length===1&&r==='staff'){ showToast('Cannot demote the only admin.','warn'); document.getElementById('role_'+u).value='admin'; return; } roles[u]=r; STORE.set('ms_roles',roles); renderAdminPanel(); }
-function deleteUser(u){ if(!confirm(`Delete user "${u}"?`))return; const roles=STORE.get('ms_roles')||{}; const admins=Object.keys(roles).filter(k=>roles[k]==='admin'); if(roles[u]==='admin'&&admins.length===1){ showToast('Cannot delete the only admin.','warn'); return; } let users=STORE.get('ms_users')||{}; delete users[u]; STORE.set('ms_users',users); delete roles[u]; STORE.set('ms_roles',roles); renderAdminPanel(); }
+function adminSendReset(email){
+  if(!auth||!email) return;
+  auth.sendPasswordResetEmail(email).then(()=>{ showToast('Reset email sent to '+email,'success'); }).catch(e=>{ showToast(friendlyAuthError(e),'error'); });
+}
+
+async function changeRole(uid,r){
+  const admins=usersCache.filter(u=>u.role==='admin');
+  const target=usersCache.find(u=>u.uid===uid);
+  if(target&&target.role==='admin'&&admins.length===1&&r==='staff'){ showToast('Cannot demote the only admin.','warn'); document.getElementById('role_'+uid).value='admin'; return; }
+  try{ await db.collection('users').doc(uid).update({role:r}); renderAdminPanel(); }
+  catch(e){ showToast('Failed to update role: '+(e.message||e),'error'); }
+}
+
+async function deleteUser(uid){
+  const admins=usersCache.filter(u=>u.role==='admin');
+  const target=usersCache.find(u=>u.uid===uid);
+  if(!target) return;
+  if(target.role==='admin'&&admins.length===1){ showToast('Cannot remove the only admin.','warn'); return; }
+  if(!confirm(`Revoke app access for "${target.username||target.email}"? Their Firebase Auth login will still exist — delete it from the Firebase Console (Authentication tab) if you want it fully removed.`))return;
+  try{ await db.collection('users').doc(uid).delete(); renderAdminPanel(); }
+  catch(e){ showToast('Failed to revoke access: '+(e.message||e),'error'); }
+}
 
 function renderStaffActivity(){
-  const meds=STORE.get('ms_medicines')||[]; const bills=STORE.get('ms_bills')||[]; const users=STORE.get('ms_users')||{}; const roles=STORE.get('ms_roles')||{};
+  const meds=STORE.get('ms_medicines')||[]; const bills=STORE.get('ms_bills')||[];
+  const roleByName={}; usersCache.forEach(u=>{ roleByName[u.username||u.email]=u.role; });
   const userFilter=document.getElementById('activityUserFilter').value; const typeFilter=document.getElementById('activityTypeFilter').value;
   const sel=document.getElementById('activityUserFilter'); const prev=sel.value;
   sel.innerHTML='<option value="all">All Staff</option>';
-  Object.keys(users).forEach(u=>{ const opt=document.createElement('option'); opt.value=u; opt.textContent=u+' ('+(roles[u]||'staff')+')'; sel.appendChild(opt); }); sel.value=prev;
+  usersCache.forEach(u=>{ const name=u.username||u.email; const opt=document.createElement('option'); opt.value=name; opt.textContent=name+' ('+u.role+')'; sel.appendChild(opt); }); sel.value=prev;
   let activities=[];
   if(typeFilter!=='bill') meds.forEach(m=>activities.push({type:'medicine',user:m.addedBy||'Unknown',details:m.name,extra:'₹'+parseFloat(m.price).toFixed(2),date:m.addedOn||'—',ts:m.id||0}));
   if(typeFilter!=='medicine') bills.forEach(b=>activities.push({type:'bill',user:b.generatedBy||'Unknown',details:b.billId+' — '+b.patient+' ('+b.items.length+' item'+(b.items.length>1?'s':'')+')',extra:'₹'+b.total.toFixed(2),date:b.date,ts:parseInt(b.billId.replace('RX-',''))||0}));
@@ -768,7 +944,7 @@ function renderStaffActivity(){
   meds.forEach(m=>{ const u=m.addedBy||'Unknown'; if(!summaryMap[u]) summaryMap[u]={meds:0,bills:0,revenue:0}; summaryMap[u].meds++; });
   bills.forEach(b=>{ const u=b.generatedBy||'Unknown'; if(!summaryMap[u]) summaryMap[u]={meds:0,bills:0,revenue:0}; summaryMap[u].bills++; summaryMap[u].revenue+=b.total; });
   const sd=document.getElementById('staffSummaryCards'); const fu=userFilter==='all'?Object.keys(summaryMap):[userFilter];
-  sd.innerHTML=fu.length===0?'':fu.map(u=>{ const s=summaryMap[u]||{meds:0,bills:0,revenue:0}; const role=roles[u]||'staff'; return `<div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px 16px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><div style="width:32px;height:32px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;color:var(--green)">${u[0].toUpperCase()}</div><div><div style="font-weight:600;font-size:14px">${u}</div><div style="font-size:11px;color:var(--muted)">${role}</div></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px"><div style="background:white;border-radius:6px;padding:6px 8px"><div style="color:var(--muted)">Medicines</div><div style="font-weight:600;color:var(--green)">${s.meds}</div></div><div style="background:white;border-radius:6px;padding:6px 8px"><div style="color:var(--muted)">Bills</div><div style="font-weight:600;color:var(--blue)">${s.bills}</div></div><div style="background:white;border-radius:6px;padding:6px 8px;grid-column:span 2"><div style="color:var(--muted)">Revenue</div><div style="font-weight:600;color:var(--amber)">₹${s.revenue.toFixed(2)}</div></div></div></div>`; }).join('');
+  sd.innerHTML=fu.length===0?'':fu.map(u=>{ const s=summaryMap[u]||{meds:0,bills:0,revenue:0}; const role=roleByName[u]||'staff'; return `<div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px 16px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><div style="width:32px;height:32px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;color:var(--green)">${u[0].toUpperCase()}</div><div><div style="font-weight:600;font-size:14px">${u}</div><div style="font-size:11px;color:var(--muted)">${role}</div></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px"><div style="background:white;border-radius:6px;padding:6px 8px"><div style="color:var(--muted)">Medicines</div><div style="font-weight:600;color:var(--green)">${s.meds}</div></div><div style="background:white;border-radius:6px;padding:6px 8px"><div style="color:var(--muted)">Bills</div><div style="font-weight:600;color:var(--blue)">${s.bills}</div></div><div style="background:white;border-radius:6px;padding:6px 8px;grid-column:span 2"><div style="color:var(--muted)">Revenue</div><div style="font-weight:600;color:var(--amber)">₹${s.revenue.toFixed(2)}</div></div></div></div>`; }).join('');
   const tbody=document.getElementById('activityList'); tbody.innerHTML='';
   document.getElementById('activityEmpty').style.display=activities.length?'none':'block';
   activities.forEach(a=>{ const isMed=a.type==='medicine'; const tr=document.createElement('tr'); tr.innerHTML=`<td><span class="status-pill ${isMed?'status-safe':'status-warning'}">${isMed?'💊 Medicine':'🧾 Bill'}</span></td><td><div style="display:flex;align-items:center;gap:8px"><div style="width:28px;height:28px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--green)">${(a.user||'?')[0].toUpperCase()}</div><span style="font-weight:500">${a.user}</span></div></td><td>${a.details}</td><td style="font-weight:600;color:${isMed?'var(--muted)':'var(--green)'}">${a.extra}</td><td style="color:var(--muted);font-size:13px">${a.date}</td>`; tbody.appendChild(tr); });
@@ -777,14 +953,8 @@ function renderStaffActivity(){
 /* ═══════════════════════════════════════════════════
    INVENTORY
 ═══════════════════════════════════════════════════ */
-function getMeds(){ return medsCache; }
-function saveMeds(m){
-  medsCache = m; // update immediately so the UI feels instant
-  setDoc(medsDocRef, {list:m}).catch(err=>{
-    console.error('Failed to save medicines online:', err);
-    showToast('⚠️ Failed to save — check your internet connection','error');
-  });
-}
+function getMeds(){ return STORE.get('ms_medicines')||[]; }
+function saveMeds(m){ STORE.set('ms_medicines',m); }
 
 function getExpiryStatus(expiry){
   const today=new Date(); today.setHours(0,0,0,0); const exp=new Date(expiry); const days=Math.ceil((exp-today)/(1000*60*60*24));
@@ -800,17 +970,22 @@ function addMedicine(){
   const type=document.getElementById('medType').value;
   const qty=document.getElementById('medQty').value;
   const price=parseFloat(document.getElementById('medPrice').value);
+  const schedule=document.getElementById('medSchedule').value;
+  const batch=document.getElementById('medBatch').value.trim();
   if(!name||!expiry||isNaN(price)||price<0){ showToast('Please fill all fields correctly','warn'); return; }
   const meds=getMeds();
-  meds.push({id:Date.now(),name,expiry,type,qty:qty!==''?parseInt(qty):null,price,addedBy:currentUser,addedOn:new Date().toLocaleDateString('en-IN')});
+  const newMed={id:Date.now(),name,expiry,type,qty:qty!==''?parseInt(qty):null,price,schedule:schedule||'none',batch:batch||'',addedBy:currentUser,addedOn:new Date().toLocaleDateString('en-IN')};
+  meds.push(newMed);
   saveMeds(meds);
-  document.getElementById('medName').value=''; document.getElementById('expiryDate').value=''; document.getElementById('medQty').value=''; document.getElementById('medPrice').value='';
+  fsSetMedicine(newMed);
+  document.getElementById('medName').value=''; document.getElementById('expiryDate').value=''; document.getElementById('medQty').value=''; document.getElementById('medPrice').value=''; document.getElementById('medSchedule').value='none'; document.getElementById('medBatch').value='';
   renderInventory(); renderShortageBadge(); showToast('Medicine added!','success');
 }
 
 function deleteMedicine(id){
   if(!confirm('Remove this medicine from stock?'))return;
   saveMeds(getMeds().filter(m=>m.id!==id));
+  fsDeleteMedicine(id);
   renderInventory(); renderShortageBadge();
 }
 
@@ -819,6 +994,8 @@ function openEditModal(id){
   document.getElementById('editMedId').value=id;
   document.getElementById('editName').value=med.name;
   document.getElementById('editType').value=med.type||'tablet';
+  document.getElementById('editSchedule').value=med.schedule||'none';
+  document.getElementById('editBatch').value=med.batch||'';
   document.getElementById('editExpiry').value=med.expiry;
   document.getElementById('editQtyCurrent').value=med.qty!==null&&med.qty!==undefined?med.qty:'Not Set';
   document.getElementById('editQtyAdd').value='';
@@ -834,6 +1011,8 @@ function saveEditMedicine(){
   const meds=getMeds(); const idx=meds.findIndex(m=>m.id===id); if(idx===-1)return;
   const name=document.getElementById('editName').value.trim();
   const type=document.getElementById('editType').value;
+  const schedule=document.getElementById('editSchedule').value;
+  const batch=document.getElementById('editBatch').value.trim();
   const expiry=document.getElementById('editExpiry').value;
   const qtyAdd=document.getElementById('editQtyAdd').value;
   const qtySet=document.getElementById('editQtySet').value;
@@ -842,8 +1021,8 @@ function saveEditMedicine(){
   let newQty=meds[idx].qty;
   if(qtySet!=='') newQty=parseInt(qtySet);
   else if(qtyAdd!=='') newQty=(newQty||0)+parseInt(qtyAdd);
-  meds[idx]={...meds[idx],name,type,expiry,qty:newQty,price};
-  saveMeds(meds); closeEditModal(); renderInventory(); renderShortageBadge(); showToast('Medicine updated!','success');
+  meds[idx]={...meds[idx],name,type,schedule:schedule||'none',batch:batch||'',expiry,qty:newQty,price};
+  saveMeds(meds); fsSetMedicine(meds[idx]); closeEditModal(); renderInventory(); renderShortageBadge(); showToast('Medicine updated!','success');
 }
 
 function fuzzyMatch(query, target){
@@ -870,6 +1049,7 @@ function renderInventory(){
   const filterStatus=document.getElementById('filterStatus')?.value||'all';
   const filterType=document.getElementById('filterType')?.value||'all';
   const filterStock=document.getElementById('filterStock')?.value||'all';
+  const filterSchedule=document.getElementById('filterSchedule')?.value||'all';
   const tbody=document.getElementById('medList'); tbody.innerHTML='';
   let expired=0,warning=0,good=0,low=0;
   meds.forEach(m=>{ const s=getExpiryStatus(m.expiry); if(s.key==='expired')expired++; else if(s.key==='warning')warning++; else good++; const sl=getStockLevel(m.type||'tablet',m.qty); if(sl.key==='danger'||sl.key==='ok')low++; });
@@ -884,7 +1064,8 @@ function renderInventory(){
     if(filterStatus!=='all'&&es.key!==filterStatus)return false;
     if(filterType!=='all'&&(m.type||'tablet')!==filterType)return false;
     if(filterStock!=='all'&&sl.key!==filterStock)return false;
-    if(search){ const score=Math.max(fuzzyMatch(search,m.name),fuzzyMatch(search,m.type||''),fuzzyMatch(search,m.expiry||'')); return score>0; }
+    if(filterSchedule!=='all'&&(m.schedule||'none')!==filterSchedule)return false;
+    if(search){ const score=Math.max(fuzzyMatch(search,m.name),fuzzyMatch(search,m.type||''),fuzzyMatch(search,m.expiry||''),fuzzyMatch(search,m.batch||'')); return score>0; }
     return true;
   });
 
@@ -898,6 +1079,8 @@ function renderInventory(){
       <td style="color:var(--muted);font-size:12px">${i+1}</td>
       <td style="font-weight:500">${search?highlightMatch(m.name,search):m.name}</td>
       <td><span class="status-pill ${typeCls(m.type||'other')}">${typeLabel(m.type||'other')}</span></td>
+      <td><span class="schedule-pill ${scheduleCls(m.schedule)}">${scheduleLabel(m.schedule)}</span></td>
+      <td style="font-size:13px;color:var(--muted)">${m.batch?(search?highlightMatch(m.batch,search):m.batch):'—'}</td>
       <td>${m.expiry}</td>
       <td style="font-weight:600">${m.qty!==null&&m.qty!==undefined?m.qty:'—'}</td>
       <td><span class="qty-pill ${sl.cls}">${sl.icon} ${sl.label}</span></td>
@@ -945,12 +1128,12 @@ function renderShortage(){
       html+=`<div class="card shortage-section"><div class="shortage-section-title">${typeIcons[type]} ${typeNames[type]}<span style="font-size:12px;font-weight:400;color:var(--muted)">Good: ≥${thresholds.good} | Low: ${thresholds.ok}–${thresholds.good-1} | Danger: &lt;${thresholds.ok}</span></div>`;
       if(danger.length>0){
         html+=`<div style="margin-bottom:14px"><div style="font-size:13px;font-weight:600;color:var(--red);margin-bottom:8px;display:flex;align-items:center;gap:6px">🔴 Critical / Danger (${danger.length})</div>`;
-        danger.forEach(m=>{ html+=`<div class="shortage-card danger"><div class="shortage-icon">${typeIcons[type]}</div><div class="shortage-info"><div class="shortage-name">${m.name}</div><div class="shortage-meta">Expiry: ${m.expiry} · Added by: ${m.addedBy||'—'}</div></div><div class="shortage-qty"><div class="shortage-qty-val">${m.qty!==null&&m.qty!==undefined?m.qty:0}</div><div class="shortage-qty-label">units left</div></div><button class="btn-sm btn-amber" style="margin-left:10px" onclick="openEditModal(${m.id});switchTab('inventory',document.querySelector('.nav-tab'))">✏️ Restock</button></div>`; });
+        danger.forEach(m=>{ html+=`<div class="shortage-card danger"><div class="shortage-icon">${typeIcons[type]}</div><div class="shortage-info"><div class="shortage-name">${m.name} <span class="schedule-pill ${scheduleCls(m.schedule)}" style="margin-left:6px">${scheduleLabel(m.schedule)}</span></div><div class="shortage-meta">Expiry: ${m.expiry} · Batch: ${m.batch||'—'} · Added by: ${m.addedBy||'—'}</div></div><div class="shortage-qty"><div class="shortage-qty-val">${m.qty!==null&&m.qty!==undefined?m.qty:0}</div><div class="shortage-qty-label">units left</div></div><button class="btn-sm btn-amber" style="margin-left:10px" onclick="openEditModal(${m.id});switchTab('inventory',document.querySelector('.nav-tab'))">✏️ Restock</button></div>`; });
         html+='</div>';
       }
       if(ok.length>0){
         html+=`<div><div style="font-size:13px;font-weight:600;color:var(--yellow);margin-bottom:8px;display:flex;align-items:center;gap:6px">🟡 Low Stock (${ok.length})</div>`;
-        ok.forEach(m=>{ html+=`<div class="shortage-card ok"><div class="shortage-icon">${typeIcons[type]}</div><div class="shortage-info"><div class="shortage-name">${m.name}</div><div class="shortage-meta">Expiry: ${m.expiry} · Added by: ${m.addedBy||'—'}</div></div><div class="shortage-qty"><div class="shortage-qty-val">${m.qty!==null&&m.qty!==undefined?m.qty:0}</div><div class="shortage-qty-label">units left</div></div><button class="btn-sm btn-amber" style="margin-left:10px" onclick="openEditModal(${m.id});switchTab('inventory',document.querySelector('.nav-tab'))">✏️ Restock</button></div>`; });
+        ok.forEach(m=>{ html+=`<div class="shortage-card ok"><div class="shortage-icon">${typeIcons[type]}</div><div class="shortage-info"><div class="shortage-name">${m.name} <span class="schedule-pill ${scheduleCls(m.schedule)}" style="margin-left:6px">${scheduleLabel(m.schedule)}</span></div><div class="shortage-meta">Expiry: ${m.expiry} · Batch: ${m.batch||'—'} · Added by: ${m.addedBy||'—'}</div></div><div class="shortage-qty"><div class="shortage-qty-val">${m.qty!==null&&m.qty!==undefined?m.qty:0}</div><div class="shortage-qty-label">units left</div></div><button class="btn-sm btn-amber" style="margin-left:10px" onclick="openEditModal(${m.id});switchTab('inventory',document.querySelector('.nav-tab'))">✏️ Restock</button></div>`; });
         html+='</div>';
       }
       html+='</div>';
@@ -983,6 +1166,7 @@ function onBillSearch(){
     const sl=getStockLevel(x.m.type||'tablet',x.m.qty);
     return `<div class="autocomplete-item" data-idx="${i}" onmousedown="selectBillMed(${x.m.id})">
       <span class="status-pill ${typeCls(x.m.type||'other')} ac-type">${typeLabel(x.m.type||'other')}</span>
+      ${x.m.schedule&&x.m.schedule!=='none'?`<span class="schedule-pill ${scheduleCls(x.m.schedule)}">${scheduleLabel(x.m.schedule)}</span>`:''}
       <span class="ac-name">${highlightMatch(x.m.name,q)}</span>
       <span class="ac-qty ${sl.cls}" style="padding:2px 8px;border-radius:20px">${sl.icon} ${x.m.qty!==null&&x.m.qty!==undefined?x.m.qty:'—'}</span>
       <span class="ac-price">₹${parseFloat(x.m.price).toFixed(2)}</span>
@@ -1010,7 +1194,8 @@ function selectBillMed(id){
   const sl=getStockLevel(med.type||'tablet',med.qty);
   const info=document.getElementById('selectedMedInfo');
   info.style.display='block';
-  info.innerHTML=`✅ Selected: <strong>${med.name}</strong> · ${typeLabel(med.type||'other')} · ₹${parseFloat(med.price).toFixed(2)} · Stock: <span class="${sl.cls}" style="padding:1px 6px;border-radius:10px">${sl.icon} ${med.qty!==null&&med.qty!==undefined?med.qty:'—'}</span>`;
+  const schedTag=med.schedule&&med.schedule!=='none'?` · <span class="schedule-pill ${scheduleCls(med.schedule)}">${scheduleLabel(med.schedule)}</span>`:'';
+  info.innerHTML=`✅ Selected: <strong>${med.name}</strong> · ${typeLabel(med.type||'other')}${schedTag} · Batch: ${med.batch||'—'} · ₹${parseFloat(med.price).toFixed(2)} · Stock: <span class="${sl.cls}" style="padding:1px 6px;border-radius:10px">${sl.icon} ${med.qty!==null&&med.qty!==undefined?med.qty:'—'}</span>`;
 }
 
 /* ═══════════════════════════════════════════════════
@@ -1034,7 +1219,7 @@ function addToBill(){
 
   const existing=cart.find(c=>c.id===selectedBillMed.id);
   if(existing){ existing.qty+=qty; }
-  else{ cart.push({id:selectedBillMed.id,name:selectedBillMed.name,price:selectedBillMed.price,qty,type:selectedBillMed.type}); }
+  else{ cart.push({id:selectedBillMed.id,name:selectedBillMed.name,price:selectedBillMed.price,qty,type:selectedBillMed.type,schedule:selectedBillMed.schedule,batch:selectedBillMed.batch}); }
 
   // NOTE: Stock is NOT deducted here. It will be deducted when bill is generated.
 
@@ -1055,7 +1240,7 @@ function renderCart(){
     return;
   }
   let html='',sub=0;
-  cart.forEach((item,i)=>{ const lt=item.price*item.qty; sub+=lt; html+=`<div class="cart-item"><div><div class="cart-name">${item.name}</div><div class="cart-price">₹${parseFloat(item.price).toFixed(2)} each · ₹${lt.toFixed(2)} total</div></div><div class="cart-qty"><button class="qty-btn" onclick="changeQty(${i},-1)">−</button><span class="qty-val">${item.qty}</span><button class="qty-btn" onclick="changeQty(${i},1)">+</button><button class="btn-sm btn-danger" style="margin-left:6px" onclick="removeCartItem(${i})">✕</button></div></div>`; });
+  cart.forEach((item,i)=>{ const lt=item.price*item.qty; sub+=lt; const schedTag=item.schedule&&item.schedule!=='none'?` <span class="schedule-pill ${scheduleCls(item.schedule)}">${scheduleLabel(item.schedule)}</span>`:''; html+=`<div class="cart-item"><div><div class="cart-name">${item.name}${schedTag}</div><div class="cart-price">₹${parseFloat(item.price).toFixed(2)} each · ₹${lt.toFixed(2)} total${item.batch?' · Batch: '+item.batch:''}</div></div><div class="cart-qty"><button class="qty-btn" onclick="changeQty(${i},-1)">−</button><span class="qty-val">${item.qty}</span><button class="qty-btn" onclick="changeQty(${i},1)">+</button><button class="btn-sm btn-danger" style="margin-left:6px" onclick="removeCartItem(${i})">✕</button></div></div>`; });
   container.innerHTML=html;
   updateBillTotals(sub);
   notice.classList.add('visible');
@@ -1096,6 +1281,7 @@ function generateBill(){
     const idx=meds.findIndex(m=>m.id===item.id);
     if(idx!==-1&&meds[idx].qty!==null&&meds[idx].qty!==undefined){
       meds[idx].qty=Math.max(0,meds[idx].qty-item.qty);
+      fsUpdateMedicineQty(meds[idx].id, meds[idx].qty);
     }
   });
   saveMeds(meds);
@@ -1108,13 +1294,14 @@ function generateBill(){
   const billId='RX-'+Date.now().toString().slice(-6); const date=new Date().toLocaleString('en-IN');
   const bill={billId,patient,doctor,date,items:JSON.parse(JSON.stringify(cart)),sub,discount,total,generatedBy:currentUser};
   const history=STORE.get('ms_bills')||[]; history.unshift(bill); STORE.set('ms_bills',history);
+  fsSaveBill(bill);
 
   showReceipt(bill);
 }
 
 function showReceipt(bill){
   const discount=bill.discount!=null?bill.discount:(bill.sub*0.03);
-  let rows=bill.items.map(item=>`<tr><td>${item.name}</td><td style="text-align:center">${item.qty}</td><td style="text-align:right">₹${parseFloat(item.price).toFixed(2)}</td><td style="text-align:right">₹${(item.price*item.qty).toFixed(2)}</td></tr>`).join('');
+  let rows=bill.items.map(item=>`<tr><td>${item.name}${item.schedule&&item.schedule!=='none'?` <span class="schedule-pill ${scheduleCls(item.schedule)}" style="font-size:10px">${scheduleLabel(item.schedule)}</span>`:''}${item.batch?`<div style="font-size:11px;color:var(--muted)">Batch: ${item.batch}</div>`:''}</td><td style="text-align:center">${item.qty}</td><td style="text-align:right">₹${parseFloat(item.price).toFixed(2)}</td><td style="text-align:right">₹${(item.price*item.qty).toFixed(2)}</td></tr>`).join('');
   document.getElementById('receiptContent').innerHTML=`
     <div class="receipt-header"><h2>💊 Rajeshwari Medical</h2><div class="store-sub">& General Store</div><p style="margin-top:8px;font-weight:600">${bill.billId} &nbsp;|&nbsp; ${bill.date}</p></div>
     <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:16px"><div><strong>Patient:</strong> ${bill.patient}</div><div><strong>Dr. Ref:</strong> ${bill.doctor}</div></div>
@@ -1147,18 +1334,6 @@ function renderHistory(){
 /* ═══════════════════════════════════════════════════
    KEYBOARD
 ═══════════════════════════════════════════════════ */
-// ── Auto-fill remembered credentials on page load ──
-(function loadRemembered(){
-  const ru = localStorage.getItem('ms_remember_user');
-  const rp = localStorage.getItem('ms_remember_pass');
-  if(ru && rp){
-    document.getElementById('loginUser').value = ru;
-    document.getElementById('loginPass').value = rp;
-    document.getElementById('rememberMe').checked = true;
-    document.getElementById('savedUserHint').style.display = 'inline';
-  }
-})();
-
 document.addEventListener('keydown',e=>{
   if(e.key==='Enter'){ const ls=document.getElementById('loginScreen'); if(ls&&ls.style.display!=='none')doLogin(); }
 });
@@ -1168,21 +1343,8 @@ document.addEventListener('click',e=>{
   if(list&&!list.contains(e.target)&&e.target.id!=='billSearch') list.style.display='none';
 });
 
-/* ═══════════════════════════════════════════════════
-   EXPOSE FUNCTIONS CALLED FROM INLINE HTML HANDLERS
-   (needed because this is now a type="module" script —
-   top-level functions no longer attach to window automatically)
-═══════════════════════════════════════════════════ */
-Object.assign(window, {
-  doLogin, doLogout, switchTab, connectBTPrinter,
-  addMedicine, deleteMedicine, openEditModal, closeEditModal, saveEditMedicine,
-  renderInventory, renderShortage, renderAdminPanel, renderStaffActivity,
-  adminCreateUser, changePassword, changeRole, deleteUser,
-  onBillSearch, onBillSearchKey, selectBillMed, addToBill,
-  changeQty, removeCartItem, clearCart, generateBill,
-  showReceipt, closeReceipt, startNewBill,
-  doBrowserPrint, doBTPrint
-});
+// ── Start real-time Firestore sync as soon as the app loads ──
+initFirestoreSync();
 </script>
 </body>
 </html>
