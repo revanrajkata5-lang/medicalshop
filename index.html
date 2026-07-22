@@ -425,6 +425,12 @@
       <div class="stat-card"><div class="stat-label">Staff Accounts</div><div class="stat-value" id="aStatStaff">0</div></div>
     </div>
     <div class="card">
+      <div class="card-title">🧰 Data Tools</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:12px">One-time import of old medicine data that was saved under a different structure (<code>pharmacy_data</code>) before this app was connected to the cloud database.</div>
+      <button class="btn-add" onclick="migrateLegacyMedicines()">📦 Import Legacy Medicines</button>
+      <div id="migrateMsg" style="margin-top:10px;font-size:13px;display:none"></div>
+    </div>
+    <div class="card">
       <div class="card-title">➕ Create New User</div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:10px;align-items:end">
         <div class="form-group"><label>Username</label><input type="text" id="newUserName" placeholder="Display name"/></div>
@@ -916,6 +922,40 @@ async function adminCreateUser(){
 function adminSendReset(email){
   if(!auth||!email) return;
   auth.sendPasswordResetEmail(email).then(()=>{ showToast('Reset email sent to '+email,'success'); }).catch(e=>{ showToast(friendlyAuthError(e),'error'); });
+}
+
+async function migrateLegacyMedicines(){
+  const msg=document.getElementById('migrateMsg');
+  const showMsg=(text,ok)=>{ msg.style.cssText='display:block;color:'+(ok?'var(--green)':'var(--red)')+';background:'+(ok?'var(--green-light)':'var(--red-light)')+';padding:8px 12px;border-radius:6px'; msg.textContent=text; };
+  if(!fsReady){ showMsg('Cloud connection unavailable.'); return; }
+  const btn=event.target; const oldText=btn.textContent; btn.disabled=true; btn.textContent='Importing…';
+  try{
+    const snap = await db.collectionGroup('medicines').get();
+    let migrated=0;
+    for(const doc of snap.docs){
+      if(doc.ref.path.split('/').length===2) continue; // already a top-level medicine doc, skip
+      const data=doc.data();
+      const list=Array.isArray(data.list)?data.list:[];
+      for(const item of list){
+        if(!item||!item.name) continue;
+        const id=item.id||(Date.now()+Math.floor(Math.random()*100000));
+        await db.collection('medicines').doc(String(id)).set({
+          id, name:item.name, expiry:item.expiry||'', type:item.type||'tablet',
+          qty:item.qty!==undefined?item.qty:null, price:item.price!==undefined?parseFloat(item.price):0,
+          schedule:item.schedule||'none', batch:item.batch||'',
+          addedBy:item.addedBy||'Migrated', addedOn:item.addedOn||new Date().toLocaleDateString('en-IN')
+        });
+        migrated++;
+      }
+    }
+    showMsg(`Imported ${migrated} medicine(s) into Inventory.`, true);
+    showToast(`Imported ${migrated} medicine(s)!`,'success');
+  }catch(e){
+    console.error('Migration failed:',e);
+    showMsg('Import failed: '+(e.message||e));
+  }finally{
+    btn.disabled=false; btn.textContent=oldText;
+  }
 }
 
 async function changeRole(uid,r){
