@@ -440,7 +440,12 @@
       <div class="stat-card"><div class="stat-label">Avg Bill Value</div><div class="stat-value amber" id="hStatAvg">₹0</div></div>
     </div>
     <div class="card">
-      <div class="card-title">📋 Bill History</div>
+      <div class="card-title">📋 Bill History
+        <button class="btn-sm btn-blue" style="margin-left:auto" onclick="downloadAllBillsCSV()">⬇️ Download All (CSV)</button>
+      </div>
+      <div class="search-row">
+        <input class="search-input" type="text" placeholder="🔍 Search by phone number, patient name, or bill ID..." id="historySearchInput" oninput="renderHistory()"/>
+      </div>
       <div id="billHistoryList"><div class="empty-state"><div class="icon">📋</div><p>No bills generated yet</p></div></div>
     </div>
   </div>
@@ -484,6 +489,19 @@
         <table><thead><tr><th>Type</th><th>Staff</th><th>Details</th><th>Amount / Price</th><th>Date & Time</th></tr></thead><tbody id="activityList"></tbody></table>
       </div>
       <div id="activityEmpty" class="empty-state" style="display:none;padding:32px"><div class="icon">🔍</div><p>No activity found</p></div>
+    </div>
+    <div class="card" style="border-color:#f5c2c7">
+      <div class="card-title" style="color:var(--red)">⚠️ Danger Zone</div>
+      <div style="background:var(--red-light);border-radius:8px;padding:12px 16px;font-size:13px;color:var(--red);margin-bottom:14px">
+        This permanently deletes <strong>all billing history</strong> for every staff member — bill records, patient details, revenue totals. Medicines and user accounts are not affected. This cannot be undone.
+      </div>
+      <div style="display:flex;gap:10px;align-items:end;flex-wrap:wrap">
+        <div class="form-group" style="max-width:280px">
+          <label>Type DELETE to confirm</label>
+          <input type="text" id="deleteAllBillsConfirm" placeholder="Type DELETE"/>
+        </div>
+        <button class="btn-sm btn-danger" style="padding:10px 18px;height:40px" onclick="deleteAllBills()">🗑️ Delete All Billing Data</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1256,6 +1274,20 @@ function saveBills(list){
   });
 }
 
+/* ── Admin-only: wipe all billing history ── */
+function deleteAllBills(){
+  const role=rolesCache[currentUser]||'staff';
+  if(role!=='admin'){ showToast('Only admins can delete billing data','warn'); return; }
+  const input=document.getElementById('deleteAllBillsConfirm');
+  if((input.value||'').trim()!=='DELETE'){ showToast('Type DELETE in the box to confirm','warn'); return; }
+  if(!confirm('This will permanently delete ALL billing history for every staff member. This cannot be undone. Continue?')) return;
+  saveBills([]);
+  input.value='';
+  showToast('All billing data deleted','success');
+  renderHistory();
+  if(document.getElementById('page-admin')?.classList.contains('active')) renderStaffActivity();
+}
+
 function generateBill(){
   if(!cart.length){ showToast('Add medicines to the bill first','warn'); return; }
 
@@ -1319,8 +1351,9 @@ function showReceipt(bill){
   updateBtPrintHint();
 }
 
-function closeReceipt(){ document.getElementById('receiptModal').classList.remove('open'); }
-function startNewBill(){ closeReceipt(); cart=[]; renderCart(); document.getElementById('patientName').value=''; document.getElementById('patientPhone').value=''; document.getElementById('patientAddress').value=''; document.getElementById('doctorRef').value=''; }
+function closeReceipt(){ document.getElementById('receiptModal').classList.remove('open'); clearBillForm(); }
+function clearBillForm(){ cart=[]; renderCart(); document.getElementById('patientName').value=''; document.getElementById('patientPhone').value=''; document.getElementById('patientAddress').value=''; document.getElementById('doctorRef').value=''; }
+function startNewBill(){ closeReceipt(); }
 
 /* ═══════════════════════════════════════════════════
    HISTORY
@@ -1332,7 +1365,73 @@ function renderHistory(){
   document.getElementById('hStatRev').textContent='₹'+total.toFixed(0);
   document.getElementById('hStatAvg').textContent='₹'+avg.toFixed(0);
   if(!bills.length){ container.innerHTML=`<div class="empty-state"><div class="icon">📋</div><p>No bills generated yet</p></div>`; return; }
-  container.innerHTML=bills.map(b=>`<div class="bill-record"><div><div style="font-weight:600;font-size:14px">${b.billId}</div><div style="font-size:12px;color:var(--muted)">${b.date} &nbsp;·&nbsp; ${b.patient}${b.patientPhone?' ('+b.patientPhone+')':''} &nbsp;·&nbsp; ${b.items.length} item(s)</div></div><div style="display:flex;align-items:center;gap:12px"><div style="font-weight:600;color:var(--green)">₹${b.total.toFixed(2)}</div><button class="btn-sm btn-blue" onclick='showReceipt(${JSON.stringify(b)})'>View</button></div></div>`).join('');
+
+  const q=(document.getElementById('historySearchInput')?.value||'').trim().toLowerCase();
+  let filtered=bills;
+  if(q){
+    filtered=bills.filter(b=>
+      (b.patientPhone||'').toLowerCase().includes(q) ||
+      (b.patient||'').toLowerCase().includes(q) ||
+      (b.billId||'').toLowerCase().includes(q)
+    );
+  }
+
+  if(!filtered.length){ container.innerHTML=`<div class="empty-state"><div class="icon">🔍</div><p>No bills match "${q}"</p></div>`; return; }
+
+  container.innerHTML=filtered.map(b=>`<div class="bill-record"><div><div style="font-weight:600;font-size:14px">${b.billId}</div><div style="font-size:12px;color:var(--muted)">${b.date} &nbsp;·&nbsp; ${b.patient}${b.patientPhone?' ('+b.patientPhone+')':''} &nbsp;·&nbsp; ${b.items.length} item(s)</div></div><div style="display:flex;align-items:center;gap:8px"><div style="font-weight:600;color:var(--green)">₹${b.total.toFixed(2)}</div><button class="btn-sm btn-blue" onclick='showReceipt(${JSON.stringify(b)})'>View</button><button class="btn-sm btn-success" onclick='downloadBillText(${JSON.stringify(b)})'>⬇️ Download</button></div></div>`).join('');
+}
+
+/* ── Download a single bill as a plain-text receipt file ── */
+function downloadBillText(bill){
+  const discount=bill.discount!=null?bill.discount:(bill.sub*0.03);
+  let lines=[];
+  lines.push('Rajeshwari Medical & General Store');
+  lines.push(bill.shopAddress||SHOP_ADDRESS);
+  lines.push('');
+  lines.push('Bill No : '+bill.billId);
+  lines.push('Date    : '+bill.date);
+  lines.push('Patient : '+bill.patient);
+  lines.push('Phone   : '+(bill.patientPhone||'—'));
+  lines.push('Address : '+(bill.patientAddress||'—'));
+  lines.push('Dr. Ref : '+bill.doctor);
+  lines.push('-'.repeat(40));
+  lines.push('Medicine'.padEnd(20)+'Qty'.padStart(6)+'Rate'.padStart(8)+'Amount'.padStart(10));
+  bill.items.forEach(item=>{
+    lines.push(item.name.substring(0,20).padEnd(20)+String(item.qty).padStart(6)+('₹'+parseFloat(item.price).toFixed(2)).padStart(8)+('₹'+(item.price*item.qty).toFixed(2)).padStart(10));
+    if(item.batch) lines.push('  Batch: '+item.batch);
+  });
+  lines.push('-'.repeat(40));
+  lines.push('Subtotal'.padEnd(30)+('₹'+bill.sub.toFixed(2)).padStart(10));
+  lines.push('Discount (3%)'.padEnd(30)+('-₹'+discount.toFixed(2)).padStart(10));
+  lines.push('TOTAL'.padEnd(30)+('₹'+bill.total.toFixed(2)).padStart(10));
+  lines.push('-'.repeat(40));
+  lines.push('Served by: '+(bill.generatedBy||''));
+  lines.push('Thank you for your visit!');
+  const blob=new Blob([lines.join('\n')],{type:'text/plain'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=bill.billId+'.txt'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/* ── Download the full bill history (respecting the current search) as CSV ── */
+function downloadAllBillsCSV(){
+  const bills=getBills();
+  if(!bills.length){ showToast('No bills to download','warn'); return; }
+  const q=(document.getElementById('historySearchInput')?.value||'').trim().toLowerCase();
+  const filtered=q?bills.filter(b=>(b.patientPhone||'').toLowerCase().includes(q)||(b.patient||'').toLowerCase().includes(q)||(b.billId||'').toLowerCase().includes(q)):bills;
+  if(!filtered.length){ showToast('No bills match the current search','warn'); return; }
+  const esc=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+  const header=['Bill ID','Date','Patient Name','Phone Number','Address','Doctor Ref','Items','Subtotal','Discount','Total','Generated By'];
+  const rows=filtered.map(b=>[
+    b.billId, b.date, b.patient, b.patientPhone||'', b.patientAddress||'', b.doctor||'',
+    b.items.map(i=>i.name+' x'+i.qty).join('; '),
+    b.sub.toFixed(2), (b.discount!=null?b.discount:b.sub*0.03).toFixed(2), b.total.toFixed(2), b.generatedBy||''
+  ].map(esc).join(','));
+  const csv=[header.map(esc).join(','), ...rows].join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='bill_history_'+new Date().toISOString().slice(0,10)+'.csv'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 /* ═══════════════════════════════════════════════════
@@ -1373,7 +1472,7 @@ Object.assign(window, {
   onBillSearch, onBillSearchKey, selectBillMed, addToBill,
   changeQty, removeCartItem, clearCart, generateBill,
   showReceipt, closeReceipt, startNewBill,
-  doBrowserPrint, doBTPrint
+  doBrowserPrint, doBTPrint, renderHistory, downloadBillText, downloadAllBillsCSV, deleteAllBills
 });
 </script>
 </body>
