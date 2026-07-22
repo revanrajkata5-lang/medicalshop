@@ -441,7 +441,7 @@
     </div>
     <div class="card">
       <div class="card-title">📋 Bill History
-        <button class="btn-sm btn-blue" style="margin-left:auto" onclick="downloadAllBillsCSV()">⬇️ Download All (CSV)</button>
+        <button class="btn-sm btn-blue" id="downloadAllBillsBtn" style="margin-left:auto;display:none" onclick="downloadAllBillsCSV()">⬇️ Download All (CSV)</button>
       </div>
       <div class="search-row">
         <input class="search-input" type="text" placeholder="🔍 Search by phone number, patient name, or bill ID..." id="historySearchInput" oninput="renderHistory()"/>
@@ -840,6 +840,7 @@ function doLogin(){
     document.getElementById('currentUserLabel').textContent=u+' ('+(roles[u]||'staff')+')';
     const isAdmin=(roles[u]||'staff')==='admin';
     document.getElementById('adminTab').style.display=isAdmin?'block':'none';
+    document.getElementById('downloadAllBillsBtn').style.display=isAdmin?'inline-flex':'none';
     document.getElementById('loginScreen').style.display='none';
     document.getElementById('appScreen').style.display='block';
     renderInventory(); renderHistory(); renderShortageBadge();
@@ -858,6 +859,7 @@ function doLogin(){
 function doLogout(){
   currentUser=null; cart=[]; selectedBillMed=null;
   btDevice=null; btCharacteristic=null; resetPrinterBtn();
+  document.getElementById('downloadAllBillsBtn').style.display='none';
   document.getElementById('printerStatusBar').style.display='none';
   document.getElementById('appScreen').style.display='none';
   document.getElementById('loginScreen').style.display='flex';
@@ -1415,6 +1417,8 @@ function downloadBillText(bill){
 
 /* ── Download the full bill history (respecting the current search) as CSV ── */
 function downloadAllBillsCSV(){
+  const role=rolesCache[currentUser]||'staff';
+  if(role!=='admin'){ showToast('Only admins can download all billing data','warn'); return; }
   const bills=getBills();
   if(!bills.length){ showToast('No bills to download','warn'); return; }
   const q=(document.getElementById('historySearchInput')?.value||'').trim().toLowerCase();
