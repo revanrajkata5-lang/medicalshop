@@ -561,10 +561,11 @@ function setSyncStatus(state){
   else { el.textContent='☁️ Offline'; el.style.color='var(--muted)'; }
 }
 
+let _unsubMeds=null, _unsubBills=null;
 function initFirestoreSync(){
   if(!fsReady) return;
 
-  db.collection('medicines').onSnapshot(snapshot=>{
+  _unsubMeds = db.collection('medicines').onSnapshot(snapshot=>{
     const meds=[];
     snapshot.forEach(doc=>meds.push(doc.data()));
     meds.sort((a,b)=>(a.id||0)-(b.id||0));
@@ -579,7 +580,7 @@ function initFirestoreSync(){
     }
   }, err=>{ console.error('Firestore medicines sync error:',err); setSyncStatus('error'); });
 
-  db.collection('bills').onSnapshot(snapshot=>{
+  _unsubBills = db.collection('bills').onSnapshot(snapshot=>{
     const bills=[];
     snapshot.forEach(doc=>bills.push(doc.data()));
     bills.sort((a,b)=>(b._ts||0)-(a._ts||0));
@@ -589,6 +590,10 @@ function initFirestoreSync(){
       if(histPage&&histPage.classList.contains('active')) renderHistory();
     }
   }, err=>{ console.error('Firestore bills sync error:',err); setSyncStatus('error'); });
+}
+function stopFirestoreSync(){
+  if(_unsubMeds){ _unsubMeds(); _unsubMeds=null; }
+  if(_unsubBills){ _unsubBills(); _unsubBills=null; }
 }
 
 function fsSetMedicine(med){
@@ -797,6 +802,7 @@ function doLogout(){
 }
 
 // ── Central auth state handler: fires on login, logout, and page reload ──
+let syncStarted = false;
 if(auth){
   auth.onAuthStateChanged(async user=>{
     if(user){
@@ -815,6 +821,7 @@ if(auth){
         document.getElementById('adminTab').style.display=currentUserRole==='admin'?'block':'none';
         document.getElementById('loginScreen').style.display='none';
         document.getElementById('appScreen').style.display='block';
+        if(!syncStarted){ syncStarted=true; initFirestoreSync(); }
         renderInventory(); renderHistory(); renderShortageBadge();
         document.getElementById('loginUser').value=''; document.getElementById('loginPass').value=''; document.getElementById('loginError').style.display='none';
       }catch(e){
@@ -823,6 +830,7 @@ if(auth){
       }
     } else {
       currentUser=null; currentUserUid=null; currentUserRole=null;
+      stopFirestoreSync(); syncStarted=false;
       document.getElementById('appScreen').style.display='none';
       document.getElementById('loginScreen').style.display='flex';
     }
@@ -1342,9 +1350,6 @@ document.addEventListener('click',e=>{
   const list=document.getElementById('billAutoList');
   if(list&&!list.contains(e.target)&&e.target.id!=='billSearch') list.style.display='none';
 });
-
-// ── Start real-time Firestore sync as soon as the app loads ──
-initFirestoreSync();
 </script>
 </body>
 </html>
