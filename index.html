@@ -402,7 +402,9 @@
       <div>
         <div class="card" style="position:sticky;top:80px">
           <div class="card-title">🧾 Bill Summary</div>
-          <div class="form-group" style="margin-bottom:14px"><label>Patient / Customer Name</label><input type="text" id="patientName" placeholder="Enter name (optional)"/></div>
+          <div class="form-group" style="margin-bottom:14px"><label>Patient / Customer Name *</label><input type="text" id="patientName" placeholder="Enter full name"/></div>
+          <div class="form-group" style="margin-bottom:14px"><label>Patient Phone Number *</label><input type="tel" id="patientPhone" placeholder="e.g. 9876543210" maxlength="15"/></div>
+          <div class="form-group" style="margin-bottom:14px"><label>Patient Address *</label><input type="text" id="patientAddress" placeholder="Enter address"/></div>
           <div class="form-group" style="margin-bottom:0"><label>Doctor / Prescription Ref</label><input type="text" id="doctorRef" placeholder="Dr. name or Ref. no."/></div>
           <div class="bill-summary">
             <div class="bill-row"><span>Subtotal</span><span id="subtotalAmt">₹0.00</span></div>
@@ -677,6 +679,8 @@ let cart = [];
 let selectedBillMed = null;
 let acIndex = -1;
 
+const SHOP_ADDRESS = 'Near Bus Stand, Gogulamallaiah Bazar, Mahabubabad, 506101, Telangana';
+
 /* ═══════════════════════════════════════════════════
    STOCK THRESHOLDS
 ═══════════════════════════════════════════════════ */
@@ -760,8 +764,9 @@ function buildEscPos(bill){
   const raw=(...b)=>chunks.push(new Uint8Array(b)); const text=s=>chunks.push(enc.encode(s)); const nl=()=>chunks.push(new Uint8Array([LF])); const line=s=>{text(s);nl();};
   const W=32; const pad=(s,n)=>String(s).substring(0,n).padEnd(n); const rpad=(s,n)=>String(s).substring(0,n).padStart(n); const divider=()=>line('-'.repeat(W));
   raw(ESC,0x40); raw(ESC,0x74,0x00); raw(GS,0x61,0x00);
-  raw(ESC,0x61,0x01); raw(ESC,0x21,0x10); line('Rajeshwari Medical'); raw(ESC,0x21,0x00); line('& General Store'); nl();
-  raw(ESC,0x61,0x00); divider(); line('Bill  : '+bill.billId); line('Date  : '+bill.date); line('Pt    : '+(bill.patient||'Walk-in').substring(0,22)); if(bill.doctor&&bill.doctor!=='—') line('Dr.   : '+bill.doctor.substring(0,23)); divider();
+  raw(ESC,0x61,0x01); raw(ESC,0x21,0x10); line('Rajeshwari Medical'); raw(ESC,0x21,0x00); line('& General Store');
+  const shopAddr=bill.shopAddress||SHOP_ADDRESS; for(let i=0;i<shopAddr.length;i+=W) line(shopAddr.substring(i,i+W)); nl();
+  raw(ESC,0x61,0x00); divider(); line('Bill  : '+bill.billId); line('Date  : '+bill.date); line('Pt    : '+(bill.patient||'Walk-in').substring(0,22)); if(bill.patientPhone) line('Ph.   : '+bill.patientPhone.substring(0,23)); if(bill.patientAddress) line('Addr  : '+bill.patientAddress.substring(0,23)); if(bill.doctor&&bill.doctor!=='—') line('Dr.   : '+bill.doctor.substring(0,23)); divider();
   line(pad('Item',16)+pad('Qty',5)+rpad('Amt',11)); divider();
   bill.items.forEach(item=>{ const name=item.name.substring(0,16); const qty=String(item.qty).padStart(4)+' '; const amount=('Rs'+(item.price*item.qty).toFixed(2)).padStart(11); if(item.name.length>16){ line(name); line(' '.repeat(16)+qty+amount); line('  '+item.name.substring(16,30)); }else{ line(name+qty+amount); } if(item.batch){ line('  Batch: '+item.batch); } });
   divider();
@@ -1254,6 +1259,15 @@ function saveBills(list){
 function generateBill(){
   if(!cart.length){ showToast('Add medicines to the bill first','warn'); return; }
 
+  // ── Validate required patient details before doing anything else ──
+  const patient=document.getElementById('patientName').value.trim();
+  const patientPhone=document.getElementById('patientPhone').value.trim();
+  const patientAddress=document.getElementById('patientAddress').value.trim();
+  if(!patient){ showToast('Patient name is required','warn'); return; }
+  if(!patientPhone){ showToast('Patient phone number is required','warn'); return; }
+  if(!/^[0-9+\-\s]{7,15}$/.test(patientPhone)){ showToast('Enter a valid phone number','warn'); return; }
+  if(!patientAddress){ showToast('Patient address is required','warn'); return; }
+
   // ── Validate stock availability before finalising ──
   const meds=getMeds();
   for(const item of cart){
@@ -1275,11 +1289,10 @@ function generateBill(){
   renderShortageBadge();
 
   // ── Save bill (online, via Firestore) ──
-  const patient=document.getElementById('patientName').value.trim()||'Walk-in';
   const doctor=document.getElementById('doctorRef').value.trim()||'—';
   const sub=cart.reduce((a,c)=>a+c.price*c.qty,0); const discount=sub*0.03; const total=sub-discount;
   const billId='RX-'+Date.now().toString().slice(-6); const date=new Date().toLocaleString('en-IN');
-  const bill={billId,patient,doctor,date,items:JSON.parse(JSON.stringify(cart)),sub,discount,total,generatedBy:currentUser};
+  const bill={billId,patient,patientPhone,patientAddress,doctor,date,items:JSON.parse(JSON.stringify(cart)),sub,discount,total,generatedBy:currentUser,shopAddress:SHOP_ADDRESS};
   const history=[bill, ...getBills()]; saveBills(history);
 
   showReceipt(bill);
@@ -1289,8 +1302,13 @@ function showReceipt(bill){
   const discount=bill.discount!=null?bill.discount:(bill.sub*0.03);
   let rows=bill.items.map(item=>`<tr><td>${item.name}${item.schedule&&item.schedule!=='none'?` <span class="schedule-pill ${scheduleCls(item.schedule)}" style="font-size:10px">${scheduleLabel(item.schedule)}</span>`:''}${item.batch?`<div style="font-size:11px;color:var(--muted)">Batch: ${item.batch}</div>`:''}</td><td style="text-align:center">${item.qty}</td><td style="text-align:right">₹${parseFloat(item.price).toFixed(2)}</td><td style="text-align:right">₹${(item.price*item.qty).toFixed(2)}</td></tr>`).join('');
   document.getElementById('receiptContent').innerHTML=`
-    <div class="receipt-header"><h2>💊 Rajeshwari Medical</h2><div class="store-sub">& General Store</div><p style="margin-top:8px;font-weight:600">${bill.billId} &nbsp;|&nbsp; ${bill.date}</p></div>
-    <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:16px"><div><strong>Patient:</strong> ${bill.patient}</div><div><strong>Dr. Ref:</strong> ${bill.doctor}</div></div>
+    <div class="receipt-header"><h2>💊 Rajeshwari Medical</h2><div class="store-sub">& General Store</div><div class="store-sub">${bill.shopAddress||SHOP_ADDRESS}</div><p style="margin-top:8px;font-weight:600">${bill.billId} &nbsp;|&nbsp; ${bill.date}</p></div>
+    <div style="font-size:13px;margin-bottom:16px">
+      <div><strong>Patient:</strong> ${bill.patient}</div>
+      <div><strong>Phone:</strong> ${bill.patientPhone||'—'}</div>
+      <div><strong>Address:</strong> ${bill.patientAddress||'—'}</div>
+      <div><strong>Dr. Ref:</strong> ${bill.doctor}</div>
+    </div>
     <table class="receipt-table"><thead><tr><th>Medicine</th><th style="text-align:center">Qty</th><th style="text-align:right">Rate</th><th style="text-align:right">Amount</th></tr></thead><tbody>${rows}</tbody></table>
     <div style="text-align:right;font-size:13px;color:var(--muted)">Subtotal: ₹${bill.sub.toFixed(2)}</div>
     <div style="text-align:right;font-size:13px;color:var(--green)">Discount (3%): -₹${discount.toFixed(2)}</div>
@@ -1302,7 +1320,7 @@ function showReceipt(bill){
 }
 
 function closeReceipt(){ document.getElementById('receiptModal').classList.remove('open'); }
-function startNewBill(){ closeReceipt(); cart=[]; renderCart(); document.getElementById('patientName').value=''; document.getElementById('doctorRef').value=''; }
+function startNewBill(){ closeReceipt(); cart=[]; renderCart(); document.getElementById('patientName').value=''; document.getElementById('patientPhone').value=''; document.getElementById('patientAddress').value=''; document.getElementById('doctorRef').value=''; }
 
 /* ═══════════════════════════════════════════════════
    HISTORY
@@ -1314,7 +1332,7 @@ function renderHistory(){
   document.getElementById('hStatRev').textContent='₹'+total.toFixed(0);
   document.getElementById('hStatAvg').textContent='₹'+avg.toFixed(0);
   if(!bills.length){ container.innerHTML=`<div class="empty-state"><div class="icon">📋</div><p>No bills generated yet</p></div>`; return; }
-  container.innerHTML=bills.map(b=>`<div class="bill-record"><div><div style="font-weight:600;font-size:14px">${b.billId}</div><div style="font-size:12px;color:var(--muted)">${b.date} &nbsp;·&nbsp; ${b.patient} &nbsp;·&nbsp; ${b.items.length} item(s)</div></div><div style="display:flex;align-items:center;gap:12px"><div style="font-weight:600;color:var(--green)">₹${b.total.toFixed(2)}</div><button class="btn-sm btn-blue" onclick='showReceipt(${JSON.stringify(b)})'>View</button></div></div>`).join('');
+  container.innerHTML=bills.map(b=>`<div class="bill-record"><div><div style="font-weight:600;font-size:14px">${b.billId}</div><div style="font-size:12px;color:var(--muted)">${b.date} &nbsp;·&nbsp; ${b.patient}${b.patientPhone?' ('+b.patientPhone+')':''} &nbsp;·&nbsp; ${b.items.length} item(s)</div></div><div style="display:flex;align-items:center;gap:12px"><div style="font-weight:600;color:var(--green)">₹${b.total.toFixed(2)}</div><button class="btn-sm btn-blue" onclick='showReceipt(${JSON.stringify(b)})'>View</button></div></div>`).join('');
 }
 
 /* ═══════════════════════════════════════════════════
