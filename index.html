@@ -33,6 +33,7 @@
   .btn-primary{width:100%;padding:13px;background:var(--green);color:white;border:none;border-radius:10px;font-family:inherit;font-size:15px;font-weight:500;cursor:pointer;transition:background 0.2s,transform 0.1s;margin-top:6px;}
   .btn-primary:hover{background:#155e39;}
   .btn-primary:active{transform:scale(0.98);}
+  .btn-primary:disabled{opacity:0.55;cursor:not-allowed;}
   .login-error{background:var(--red-light);color:var(--red);border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:16px;display:none;}
   .login-hint{margin-top:20px;text-align:center;font-size:12px;color:var(--muted);}
   #appScreen{display:none;}
@@ -239,8 +240,8 @@
       </label>
       <span id="savedUserHint" style="font-size:12px;color:#2fa365;display:none">✅ Credentials saved</span>
     </div>
-    <button class="btn-primary" onclick="doLogin()">Sign In</button>
-    <div class="login-hint">Contact your admin to get account access</div>
+    <button class="btn-primary" id="loginBtn" onclick="doLogin()">Sign In</button>
+    <div class="login-hint" id="loginHint">Contact your admin to get account access</div>
   </div>
 </div>
 
@@ -569,8 +570,8 @@
 <script type="module">
 /* ═══════════════════════════════════════════════════
    FIREBASE — MODULAR SDK (v10, ES modules)
-   Medicine inventory syncs online via Firestore.
-   Users/roles/bills stay in localStorage.
+   Medicine inventory, bills, and users/logins all sync
+   online via Firestore in real time.
 ═══════════════════════════════════════════════════ */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
@@ -588,42 +589,88 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const medsDocRef = doc(db, 'pharmacy_data', 'medicines');
+const medsDocRef  = doc(db, 'pharmacy_data', 'medicines');
+const billsDocRef = doc(db, 'pharmacy_data', 'bills');
+const usersDocRef = doc(db, 'pharmacy_data', 'users');
 
-let medsCache = [];
+let medsCache  = [];
+let billsCache = [];
+let usersCache = {};   // { username: password }
+let rolesCache = {};   // { username: 'admin'|'staff' }
+
+let medsReady=false, billsReady=false, usersReady=false;
 
 // Live sync: whenever the "medicines" document changes — from THIS device
 // or from any other device/browser open on this same Firebase project —
 // this fires and every open view refreshes automatically.
 onSnapshot(medsDocRef, snap=>{
   medsCache = (snap.exists() && Array.isArray(snap.data().list)) ? snap.data().list : [];
+  medsReady = true;
   if(document.getElementById('page-inventory')?.classList.contains('active')) renderInventory();
   if(document.getElementById('page-shortage')?.classList.contains('active')) renderShortage();
   renderShortageBadge();
 }, err=>{
-  console.error('Firestore sync error:', err);
+  console.error('Firestore sync error (medicines):', err);
   showToast('⚠️ Could not connect to online medicine storage','error');
 });
 
+// Bills / billing history — synced the same way as medicines.
+onSnapshot(billsDocRef, snap=>{
+  billsCache = (snap.exists() && Array.isArray(snap.data().list)) ? snap.data().list : [];
+  billsReady = true;
+  if(document.getElementById('page-history')?.classList.contains('active')) renderHistory();
+  if(document.getElementById('page-admin')?.classList.contains('active')) renderStaffActivity();
+}, err=>{
+  console.error('Firestore sync error (bills):', err);
+  showToast('⚠️ Could not connect to online bill history','error');
+});
+
+// Users & roles / logins — synced the same way as medicines.
+onSnapshot(usersDocRef, snap=>{
+  if(snap.exists()){
+    usersCache = snap.data().users || {};
+    rolesCache = snap.data().roles || {};
+  } else {
+    usersCache = {}; rolesCache = {};
+  }
+  const firstLoad = !usersReady;
+  usersReady = true;
+  if(firstLoad) ensureDefaultAdmin();
+  updateLoginReadyUI();
+  if(document.getElementById('page-admin')?.classList.contains('active')) renderAdminPanel();
+}, err=>{
+  console.error('Firestore sync error (users):', err);
+  showToast('⚠️ Could not connect to online user accounts','error');
+});
+
+/* Ensure a default admin account always exists online, mirroring the
+   previous local-only bootstrap logic. Runs once, after first sync. */
+function ensureDefaultAdmin(){
+  let users = {...usersCache};
+  let roles = {...rolesCache};
+  let changed = false;
+  if(users['admin']==='admin123'){ delete users['admin']; delete roles['admin']; changed=true; }
+  if(users['Revanraj']){ delete users['Revanraj']; delete roles['Revanraj']; changed=true; }
+  if(!users['KataSudhakar']){ users['KataSudhakar']='9985277365@s'; changed=true; }
+  if(!roles['KataSudhakar']){ roles['KataSudhakar']='admin'; changed=true; }
+  if(changed) saveUsers(users, roles);
+}
+
+function updateLoginReadyUI(){
+  const btn=document.getElementById('loginBtn'); const hint=document.getElementById('loginHint');
+  if(!btn||!hint) return;
+  if(usersReady){ btn.disabled=false; btn.textContent='Sign In'; hint.textContent='Contact your admin to get account access'; }
+  else{ btn.disabled=true; btn.textContent='Loading...'; hint.textContent='Connecting to online account storage...'; }
+}
+
 /* ═══════════════════════════════════════════════════
-   STORAGE
+   STORAGE (local — kept only for "remember me" autofill,
+   a per-device convenience, not source of truth for data)
 ═══════════════════════════════════════════════════ */
 const STORE = {
   get(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } },
   set(k,v){ localStorage.setItem(k,JSON.stringify(v)); }
 };
-
-(function initUsers(){
-  let users = STORE.get('ms_users')||{};
-  let roles = STORE.get('ms_roles')||{};
-  if(users['admin']==='admin123'){ delete users['admin']; delete roles['admin']; }
-  // Remove old admin if exists
-  if(users['Revanraj']){ delete users['Revanraj']; delete roles['Revanraj']; }
-  if(!users['KataSudhakar']){ users['KataSudhakar']='9985277365@s'; }
-  if(!roles['KataSudhakar']){ roles['KataSudhakar']='admin'; }
-  STORE.set('ms_users',users);
-  STORE.set('ms_roles',roles);
-})();
 
 let currentUser = null;
 let cart = [];
@@ -739,7 +786,7 @@ function updateBtPrintHint(){
 
 async function doBTPrint(){
   if(!btCharacteristic){ showToast('Connect a Bluetooth printer first','warn'); return; }
-  const bills=STORE.get('ms_bills')||[]; if(!bills.length){ showToast('No bill to print','warn'); return; }
+  const bills=billsCache; if(!bills.length){ showToast('No bill to print','warn'); return; }
   const bill=bills[0]; const btn=document.getElementById('btPrintBtn'); btn.textContent='⏳ Printing...'; btn.disabled=true;
   const log=document.getElementById('btDebugLog'); if(log){log.innerHTML='';log.style.display='block';}
   try{ const data=buildEscPos(bill); await sendToPrinter(data); showToast('✅ Receipt sent to printer!','success'); btn.textContent='✅ Printed!'; setTimeout(()=>updateBtPrintHint(),3000); }
@@ -759,11 +806,12 @@ function showToast(msg,type){
 }
 
 /* ═══════════════════════════════════════════════════
-   AUTH
+   AUTH — users & roles now come from Firestore (usersCache/rolesCache)
 ═══════════════════════════════════════════════════ */
 function doLogin(){
+  if(!usersReady){ showToast('Still connecting to online account storage — try again in a moment','warn'); return; }
   const u=document.getElementById('loginUser').value.trim(); const p=document.getElementById('loginPass').value;
-  const users=STORE.get('ms_users')||{}; const roles=STORE.get('ms_roles')||{};
+  const users=usersCache; const roles=rolesCache;
   if(users[u]&&users[u]===p){
     currentUser=u;
     document.getElementById('currentUserLabel').textContent=u+' ('+(roles[u]||'staff')+')';
@@ -772,7 +820,7 @@ function doLogin(){
     document.getElementById('loginScreen').style.display='none';
     document.getElementById('appScreen').style.display='block';
     renderInventory(); renderHistory(); renderShortageBadge();
-    // Save or clear remembered credentials
+    // Save or clear remembered credentials (local device convenience only)
     if(document.getElementById('rememberMe').checked){
       localStorage.setItem('ms_remember_user', u);
       localStorage.setItem('ms_remember_pass', p);
@@ -809,10 +857,18 @@ function switchTab(tab,el){
 }
 
 /* ═══════════════════════════════════════════════════
-   ADMIN
+   ADMIN — users/roles read from and written to Firestore
 ═══════════════════════════════════════════════════ */
+function saveUsers(users, roles){
+  usersCache = users; rolesCache = roles; // update immediately so UI feels instant
+  setDoc(usersDocRef, {users, roles}).catch(err=>{
+    console.error('Failed to save users online:', err);
+    showToast('⚠️ Failed to save — check your internet connection','error');
+  });
+}
+
 function renderAdminPanel(){
-  const users=STORE.get('ms_users')||{}; const roles=STORE.get('ms_roles')||{};
+  const users=usersCache; const roles=rolesCache;
   const names=Object.keys(users); const admins=names.filter(u=>(roles[u]||'staff')==='admin'); const staff=names.filter(u=>(roles[u]||'staff')==='staff');
   document.getElementById('aStatUsers').textContent=names.length; document.getElementById('aStatAdmins').textContent=admins.length; document.getElementById('aStatStaff').textContent=staff.length;
   const tbody=document.getElementById('userList'); tbody.innerHTML='';
@@ -834,21 +890,22 @@ function adminCreateUser(){
   const u=document.getElementById('newUserName').value.trim(); const p=document.getElementById('newUserPass').value; const role=document.getElementById('newUserRole').value;
   const msg=document.getElementById('adminCreateMsg');
   if(!u||!p){ msg.style.cssText='display:block;color:var(--red);background:var(--red-light);padding:8px 12px;border-radius:6px'; msg.textContent='Please fill username and password'; return; }
-  let users=STORE.get('ms_users')||{};
+  let users={...usersCache};
   if(users[u]){ msg.style.cssText='display:block;color:var(--red);background:var(--red-light);padding:8px 12px;border-radius:6px'; msg.textContent='Username already exists'; return; }
-  users[u]=p; STORE.set('ms_users',users);
-  let roles=STORE.get('ms_roles')||{}; roles[u]=role; STORE.set('ms_roles',roles);
+  users[u]=p;
+  let roles={...rolesCache}; roles[u]=role;
+  saveUsers(users, roles);
   document.getElementById('newUserName').value=''; document.getElementById('newUserPass').value='';
   msg.style.cssText='display:block;color:var(--green);background:var(--green-light);padding:8px 12px;border-radius:6px'; msg.textContent=`User "${u}" created as ${role}`;
   setTimeout(()=>msg.style.display='none',3000); renderAdminPanel();
 }
 
-function changePassword(u){ const pw=document.getElementById('pw_'+u).value; if(!pw){ showToast('Enter a new password','warn'); return; } if(pw.length<4){ showToast('Password must be at least 4 chars','warn'); return; } let users=STORE.get('ms_users')||{}; users[u]=pw; STORE.set('ms_users',users); document.getElementById('pw_'+u).value=''; showToast(`Password updated for "${u}"`,'success'); }
-function changeRole(u,r){ const roles=STORE.get('ms_roles')||{}; const admins=Object.keys(roles).filter(k=>roles[k]==='admin'); if(roles[u]==='admin'&&admins.length===1&&r==='staff'){ showToast('Cannot demote the only admin.','warn'); document.getElementById('role_'+u).value='admin'; return; } roles[u]=r; STORE.set('ms_roles',roles); renderAdminPanel(); }
-function deleteUser(u){ if(!confirm(`Delete user "${u}"?`))return; const roles=STORE.get('ms_roles')||{}; const admins=Object.keys(roles).filter(k=>roles[k]==='admin'); if(roles[u]==='admin'&&admins.length===1){ showToast('Cannot delete the only admin.','warn'); return; } let users=STORE.get('ms_users')||{}; delete users[u]; STORE.set('ms_users',users); delete roles[u]; STORE.set('ms_roles',roles); renderAdminPanel(); }
+function changePassword(u){ const pw=document.getElementById('pw_'+u).value; if(!pw){ showToast('Enter a new password','warn'); return; } if(pw.length<4){ showToast('Password must be at least 4 chars','warn'); return; } let users={...usersCache}; users[u]=pw; saveUsers(users, rolesCache); document.getElementById('pw_'+u).value=''; showToast(`Password updated for "${u}"`,'success'); }
+function changeRole(u,r){ const roles={...rolesCache}; const admins=Object.keys(roles).filter(k=>roles[k]==='admin'); if(roles[u]==='admin'&&admins.length===1&&r==='staff'){ showToast('Cannot demote the only admin.','warn'); document.getElementById('role_'+u).value='admin'; return; } roles[u]=r; saveUsers(usersCache, roles); renderAdminPanel(); }
+function deleteUser(u){ if(!confirm(`Delete user "${u}"?`))return; const roles={...rolesCache}; const admins=Object.keys(roles).filter(k=>roles[k]==='admin'); if(roles[u]==='admin'&&admins.length===1){ showToast('Cannot delete the only admin.','warn'); return; } let users={...usersCache}; delete users[u]; delete roles[u]; saveUsers(users, roles); renderAdminPanel(); }
 
 function renderStaffActivity(){
-  const meds=STORE.get('ms_medicines')||[]; const bills=STORE.get('ms_bills')||[]; const users=STORE.get('ms_users')||{}; const roles=STORE.get('ms_roles')||{};
+  const meds=medsCache; const bills=billsCache; const users=usersCache; const roles=rolesCache;
   const userFilter=document.getElementById('activityUserFilter').value; const typeFilter=document.getElementById('activityTypeFilter').value;
   const sel=document.getElementById('activityUserFilter'); const prev=sel.value;
   sel.innerHTML='<option value="all">All Staff</option>';
@@ -1183,7 +1240,17 @@ function updateBillTotals(sub){ const d=sub*0.03; const t=sub-d; document.getEle
 
 /* ═══════════════════════════════════════════════════
    GENERATE BILL — STOCK IS DEDUCTED HERE ONLY
+   Bill is saved to Firestore (billsCache / billsDocRef)
 ═══════════════════════════════════════════════════ */
+function getBills(){ return billsCache; }
+function saveBills(list){
+  billsCache = list; // update immediately so the UI feels instant
+  setDoc(billsDocRef, {list}).catch(err=>{
+    console.error('Failed to save bill history online:', err);
+    showToast('⚠️ Failed to save bill — check your internet connection','error');
+  });
+}
+
 function generateBill(){
   if(!cart.length){ showToast('Add medicines to the bill first','warn'); return; }
 
@@ -1207,13 +1274,13 @@ function generateBill(){
   saveMeds(meds);
   renderShortageBadge();
 
-  // ── Save bill ──
+  // ── Save bill (online, via Firestore) ──
   const patient=document.getElementById('patientName').value.trim()||'Walk-in';
   const doctor=document.getElementById('doctorRef').value.trim()||'—';
   const sub=cart.reduce((a,c)=>a+c.price*c.qty,0); const discount=sub*0.03; const total=sub-discount;
   const billId='RX-'+Date.now().toString().slice(-6); const date=new Date().toLocaleString('en-IN');
   const bill={billId,patient,doctor,date,items:JSON.parse(JSON.stringify(cart)),sub,discount,total,generatedBy:currentUser};
-  const history=STORE.get('ms_bills')||[]; history.unshift(bill); STORE.set('ms_bills',history);
+  const history=[bill, ...getBills()]; saveBills(history);
 
   showReceipt(bill);
 }
@@ -1241,7 +1308,7 @@ function startNewBill(){ closeReceipt(); cart=[]; renderCart(); document.getElem
    HISTORY
 ═══════════════════════════════════════════════════ */
 function renderHistory(){
-  const bills=STORE.get('ms_bills')||[]; const container=document.getElementById('billHistoryList');
+  const bills=getBills(); const container=document.getElementById('billHistoryList');
   const total=bills.reduce((a,b)=>a+b.total,0); const avg=bills.length?total/bills.length:0;
   document.getElementById('hStatBills').textContent=bills.length;
   document.getElementById('hStatRev').textContent='₹'+total.toFixed(0);
@@ -1263,6 +1330,7 @@ function renderHistory(){
     document.getElementById('rememberMe').checked = true;
     document.getElementById('savedUserHint').style.display = 'inline';
   }
+  updateLoginReadyUI();
 })();
 
 document.addEventListener('keydown',e=>{
