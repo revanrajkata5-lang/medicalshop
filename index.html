@@ -279,6 +279,19 @@
       </div>
     </div>
     <div class="card">
+      <div class="card-title">🪪 Drug License (DL) Number</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:14px">
+        This number is printed on every bill/receipt. Only admins can change it. Current value: <strong id="dlNumberCurrent">Not set</strong>
+      </div>
+      <div style="display:flex;gap:10px;align-items:end;flex-wrap:wrap">
+        <div class="form-group" style="max-width:280px">
+          <label>DL Number</label>
+          <input type="text" id="dlNumberInput" placeholder="e.g. TS/MBD/2019-43101"/>
+        </div>
+        <button class="btn-add" onclick="saveDlNumber()">💾 Save</button>
+      </div>
+    </div>
+    <div class="card">
       <div class="card-title">🔍 Staff Activity Monitor
         <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
           <select id="activityUserFilter" onchange="renderStaffActivity()" style="padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;outline:none"><option value="all">All Staff</option></select>
