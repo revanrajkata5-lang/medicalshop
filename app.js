@@ -685,7 +685,23 @@ function renderCart(){
     return;
   }
   let html='',sub=0;
-  cart.forEach((item,i)=>{ const lt=item.price*item.qty; sub+=lt; const schedTag=item.schedule&&item.schedule!=='none'?` <span class="schedule-pill ${scheduleCls(item.schedule)}">${scheduleLabel(item.schedule)}</span>`:''; html+=`<div class="cart-item"><div><div class="cart-name">${item.name}${schedTag}</div><div class="cart-price">₹${parseFloat(item.price).toFixed(2)} each · ₹${lt.toFixed(2)} total${item.batch?' · Batch: '+item.batch:''}</div></div><div class="cart-qty"><button class="qty-btn" onclick="changeQty(${i},-1)">−</button><span class="qty-val">${item.qty}</span><button class="qty-btn" onclick="changeQty(${i},1)">+</button><button class="btn-sm btn-danger" style="margin-left:6px" onclick="removeCartItem(${i})">✕</button></div></div>`; });
+  cart.forEach((item,i)=>{
+    const lt=item.price*item.qty; sub+=lt;
+    const hasSched=item.schedule&&item.schedule!=='none';
+    const schedValue=hasSched?`<span class="schedule-pill ${scheduleCls(item.schedule)}">${scheduleLabel(item.schedule)}</span>`:'—';
+    html+=`<div class="cart-item">
+      <div class="cart-item-top">
+        <div class="cart-name">${item.name}</div>
+        <div class="cart-price">₹${parseFloat(item.price).toFixed(2)} each</div>
+      </div>
+      <div class="cart-fields">
+        <div class="cart-field"><div class="cart-field-label">Batch No.</div><div class="cart-field-value">${item.batch||'—'}</div></div>
+        <div class="cart-field"><div class="cart-field-label">Schedule Drug</div><div class="cart-field-value">${schedValue}</div></div>
+        <div class="cart-field"><div class="cart-field-label">Quantity</div><div class="cart-field-value"><div class="cart-qty"><button class="qty-btn" onclick="changeQty(${i},-1)">−</button><span class="qty-val">${item.qty}</span><button class="qty-btn" onclick="changeQty(${i},1)">+</button></div></div></div>
+        <div class="cart-field"><div class="cart-field-label">Amount</div><div class="cart-field-value">₹${lt.toFixed(2)} <button class="btn-sm btn-danger" style="margin-left:6px" onclick="removeCartItem(${i})">✕</button></div></div>
+      </div>
+    </div>`;
+  });
   container.innerHTML=html;
   updateBillTotals(sub);
   notice.classList.add('visible');
@@ -801,7 +817,7 @@ function generateBill(){
 
 function showReceipt(bill){
   const discount=bill.discount!=null?bill.discount:(bill.sub*0.03);
-  let rows=bill.items.map(item=>`<tr><td>${item.name}${item.schedule&&item.schedule!=='none'?` <span class="schedule-pill ${scheduleCls(item.schedule)}" style="font-size:10px">${scheduleLabel(item.schedule)}</span>`:''}${item.batch?`<div style="font-size:11px;color:var(--muted)">Batch: ${item.batch}</div>`:''}</td><td style="text-align:center">${item.qty}</td><td style="text-align:right">₹${parseFloat(item.price).toFixed(2)}</td><td style="text-align:right">₹${(item.price*item.qty).toFixed(2)}</td></tr>`).join('');
+  let rows=bill.items.map(item=>`<tr><td>${item.name}</td><td style="text-align:center;font-size:12px">${item.batch||'—'}</td><td style="text-align:center">${item.schedule&&item.schedule!=='none'?`<span class="schedule-pill ${scheduleCls(item.schedule)}" style="font-size:10px">${scheduleLabel(item.schedule)}</span>`:'—'}</td><td style="text-align:center">${item.qty}</td><td style="text-align:right">₹${parseFloat(item.price).toFixed(2)}</td><td style="text-align:right">₹${(item.price*item.qty).toFixed(2)}</td></tr>`).join('');
   document.getElementById('receiptContent').innerHTML=`
     <div class="receipt-header"><h2>💊 Rajeshwari Medical</h2><div class="store-sub">& General Store</div><div class="store-sub">${bill.shopAddress||SHOP_ADDRESS}</div>${bill.dlNumber?`<div class="store-sub">D.L. No: ${bill.dlNumber}</div>`:''}<p style="margin-top:8px;font-weight:600">${bill.billId} &nbsp;|&nbsp; ${bill.date}</p></div>
     <div style="font-size:13px;margin-bottom:16px">
@@ -810,7 +826,7 @@ function showReceipt(bill){
       <div><strong>Address:</strong> ${bill.patientAddress||'—'}</div>
       <div><strong>Dr. Ref:</strong> ${bill.doctor}</div>
     </div>
-    <table class="receipt-table"><thead><tr><th>Medicine</th><th style="text-align:center">Qty</th><th style="text-align:right">Rate</th><th style="text-align:right">Amount</th></tr></thead><tbody>${rows}</tbody></table>
+    <table class="receipt-table"><thead><tr><th>Medicine</th><th style="text-align:center">Batch No.</th><th style="text-align:center">Schedule</th><th style="text-align:center">Qty</th><th style="text-align:right">Rate</th><th style="text-align:right">Amount</th></tr></thead><tbody>${rows}</tbody></table>
     <div style="text-align:right;font-size:13px;color:var(--muted)">Subtotal: ₹${bill.sub.toFixed(2)}</div>
     <div style="text-align:right;font-size:13px;color:var(--green)">Discount (3%): -₹${discount.toFixed(2)}</div>
     <div class="receipt-total">Total: ₹${bill.total.toFixed(2)}</div>
