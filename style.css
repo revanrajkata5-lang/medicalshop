@@ -99,10 +99,15 @@
   .stat-value.yellow{color:var(--yellow);}
   .stat-value.purple{color:var(--purple);}
   .billing-grid{display:grid;grid-template-columns:1fr 380px;gap:24px;align-items:start;}
-  .cart-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f0f4f2;}
+  .cart-item{padding:12px 0;border-bottom:1px solid #f0f4f2;}
   .cart-item:last-child{border-bottom:none;}
+  .cart-item-top{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
   .cart-name{flex:1;font-weight:500;font-size:14px;}
   .cart-price{color:var(--muted);font-size:13px;}
+  .cart-fields{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+  .cart-field{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 10px;}
+  .cart-field-label{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:3px;}
+  .cart-field-value{font-size:13px;font-weight:500;color:var(--text);}
   .cart-qty{display:flex;align-items:center;gap:6px;}
   .qty-btn{width:26px;height:26px;border:1px solid var(--border);border-radius:6px;background:white;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--text);font-weight:500;}
   .qty-btn:hover{background:var(--bg);}
@@ -146,9 +151,9 @@
   .receipt-header h2{font-family:'Instrument Serif',serif;font-size:22px;color:var(--green);}
   .receipt-header .store-sub{font-size:12px;color:var(--muted);margin-top:2px;}
   .receipt-header p{font-size:13px;color:var(--muted);margin-top:4px;}
-  .receipt-table{width:100%;font-size:13px;margin-bottom:16px;}
-  .receipt-table th{font-size:11px;color:var(--muted);font-weight:600;padding:6px 0;border-bottom:1px solid var(--border);}
-  .receipt-table td{padding:8px 0;border-bottom:1px dashed #eee;}
+  .receipt-table{width:100%;font-size:12px;margin-bottom:16px;}
+  .receipt-table th{font-size:10px;color:var(--muted);font-weight:600;padding:6px 4px;border-bottom:1px solid var(--border);}
+  .receipt-table td{padding:8px 4px;border-bottom:1px dashed #eee;}
   .receipt-total{font-size:18px;font-weight:600;text-align:right;padding-top:10px;color:var(--green);}
   .receipt-footer{text-align:center;margin-top:20px;font-size:12px;color:var(--muted);border-top:1px dashed var(--border);padding-top:16px;}
   .modal-actions{display:flex;flex-direction:column;gap:8px;margin-top:20px;}
@@ -199,6 +204,7 @@
     .billing-grid{grid-template-columns:1fr;}
     .inv-input-row{grid-template-columns:1fr 1fr;}.inv-input-row .btn-add{grid-column:span 2;}
     .inv-input-row2{grid-template-columns:1fr 1fr;}
+    .cart-fields{grid-template-columns:repeat(2,1fr);}
     .topbar-right{gap:6px;}
     .btn-printer{font-size:12px;padding:6px 10px;}
   }
