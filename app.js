@@ -22,13 +22,15 @@ const db = getFirestore(app);
 const medsDocRef  = doc(db, 'pharmacy_data', 'medicines');
 const billsDocRef = doc(db, 'pharmacy_data', 'bills');
 const usersDocRef = doc(db, 'pharmacy_data', 'users');
+const settingsDocRef = doc(db, 'pharmacy_data', 'settings');
 
 let medsCache  = [];
 let billsCache = [];
 let usersCache = {};   // { username: password }
 let rolesCache = {};   // { username: 'admin'|'staff' }
+let settingsCache = { dlNumber: '' };  // shop-wide settings (DL number etc.)
 
-let medsReady=false, billsReady=false, usersReady=false;
+let medsReady=false, billsReady=false, usersReady=false, settingsReady=false;
 
 // Live sync: whenever the "medicines" document changes — from THIS device
 // or from any other device/browser open on this same Firebase project —
@@ -71,6 +73,16 @@ onSnapshot(usersDocRef, snap=>{
 }, err=>{
   console.error('Firestore sync error (users):', err);
   showToast('⚠️ Could not connect to online user accounts','error');
+});
+
+// Shop settings (DL Number etc.) — synced the same way as everything else.
+onSnapshot(settingsDocRef, snap=>{
+  settingsCache = snap.exists() ? { dlNumber: snap.data().dlNumber || '' } : { dlNumber: '' };
+  settingsReady = true;
+  if(document.getElementById('page-admin')?.classList.contains('active')) renderDlNumberField();
+}, err=>{
+  console.error('Firestore sync error (settings):', err);
+  showToast('⚠️ Could not connect to online settings','error');
 });
 
 /* Ensure a default admin account always exists online, mirroring the
@@ -210,7 +222,9 @@ function buildEscPos(bill){
   const W=32; const pad=(s,n)=>String(s).substring(0,n).padEnd(n); const rpad=(s,n)=>String(s).substring(0,n).padStart(n); const divider=()=>line('-'.repeat(W));
   raw(ESC,0x40); raw(ESC,0x74,0x00); raw(GS,0x61,0x00);
   raw(ESC,0x61,0x01); raw(ESC,0x21,0x10); line('Rajeshwari Medical'); raw(ESC,0x21,0x00); line('& General Store');
-  const shopAddr=bill.shopAddress||SHOP_ADDRESS; for(let i=0;i<shopAddr.length;i+=W) line(shopAddr.substring(i,i+W)); nl();
+  const shopAddr=bill.shopAddress||SHOP_ADDRESS; for(let i=0;i<shopAddr.length;i+=W) line(shopAddr.substring(i,i+W));
+  if(bill.dlNumber) line('D.L. No: '+bill.dlNumber);
+  nl();
   raw(ESC,0x61,0x00); divider(); line('Bill  : '+bill.billId); line('Date  : '+bill.date); line('Pt    : '+(bill.patient||'Walk-in').substring(0,22)); if(bill.patientPhone) line('Ph.   : '+bill.patientPhone.substring(0,23)); if(bill.patientAddress) line('Addr  : '+bill.patientAddress.substring(0,23)); if(bill.doctor&&bill.doctor!=='—') line('Dr.   : '+bill.doctor.substring(0,23)); divider();
   line(pad('Item',16)+pad('Qty',5)+rpad('Amt',11)); divider();
   bill.items.forEach(item=>{ const name=item.name.substring(0,16); const qty=String(item.qty).padStart(4)+' '; const amount=('Rs'+(item.price*item.qty).toFixed(2)).padStart(11); if(item.name.length>16){ line(name); line(' '.repeat(16)+qty+amount); line('  '+item.name.substring(16,30)); }else{ line(name+qty+amount); } if(item.batch){ line('  Batch: '+item.batch); } });
@@ -320,6 +334,7 @@ function saveUsers(users, roles){
 }
 
 function renderAdminPanel(){
+  renderDlNumberField();
   const users=usersCache; const roles=rolesCache;
   const names=Object.keys(users); const admins=names.filter(u=>(roles[u]||'staff')==='admin'); const staff=names.filter(u=>(roles[u]||'staff')==='staff');
   document.getElementById('aStatUsers').textContent=names.length; document.getElementById('aStatAdmins').textContent=admins.length; document.getElementById('aStatStaff').textContent=staff.length;
@@ -704,6 +719,31 @@ function saveBills(list){
 }
 
 /* ── Admin-only: wipe all billing history ── */
+/* ── Admin-only: Drug License (DL) Number, printed on every bill ── */
+function renderDlNumberField(){
+  const input=document.getElementById('dlNumberInput');
+  if(!input) return;
+  // Don't clobber what the admin is currently typing
+  if(document.activeElement!==input){ input.value=settingsCache.dlNumber||''; }
+  const label=document.getElementById('dlNumberCurrent');
+  if(label) label.textContent=settingsCache.dlNumber ? settingsCache.dlNumber : 'Not set';
+}
+
+function saveDlNumber(){
+  const role=rolesCache[currentUser]||'staff';
+  if(role!=='admin'){ showToast('Only admins can change the DL number','warn'); return; }
+  const val=(document.getElementById('dlNumberInput').value||'').trim();
+  if(!val){ showToast('Enter a DL number','warn'); return; }
+  settingsCache={...settingsCache, dlNumber:val};
+  setDoc(settingsDocRef, {dlNumber:val}).then(()=>{
+    showToast('DL Number updated','success');
+    renderDlNumberField();
+  }).catch(err=>{
+    console.error('Failed to save DL number online:', err);
+    showToast('⚠️ Failed to save — check your internet connection','error');
+  });
+}
+
 function deleteAllBills(){
   const role=rolesCache[currentUser]||'staff';
   if(role!=='admin'){ showToast('Only admins can delete billing data','warn'); return; }
@@ -753,7 +793,7 @@ function generateBill(){
   const doctor=document.getElementById('doctorRef').value.trim()||'—';
   const sub=cart.reduce((a,c)=>a+c.price*c.qty,0); const discount=sub*0.03; const total=sub-discount;
   const billId='RX-'+Date.now().toString().slice(-6); const date=new Date().toLocaleString('en-IN');
-  const bill={billId,patient,patientPhone,patientAddress,doctor,date,items:JSON.parse(JSON.stringify(cart)),sub,discount,total,generatedBy:currentUser,shopAddress:SHOP_ADDRESS};
+  const bill={billId,patient,patientPhone,patientAddress,doctor,date,items:JSON.parse(JSON.stringify(cart)),sub,discount,total,generatedBy:currentUser,shopAddress:SHOP_ADDRESS,dlNumber:settingsCache.dlNumber||''};
   const history=[bill, ...getBills()]; saveBills(history);
 
   showReceipt(bill);
@@ -763,7 +803,7 @@ function showReceipt(bill){
   const discount=bill.discount!=null?bill.discount:(bill.sub*0.03);
   let rows=bill.items.map(item=>`<tr><td>${item.name}${item.schedule&&item.schedule!=='none'?` <span class="schedule-pill ${scheduleCls(item.schedule)}" style="font-size:10px">${scheduleLabel(item.schedule)}</span>`:''}${item.batch?`<div style="font-size:11px;color:var(--muted)">Batch: ${item.batch}</div>`:''}</td><td style="text-align:center">${item.qty}</td><td style="text-align:right">₹${parseFloat(item.price).toFixed(2)}</td><td style="text-align:right">₹${(item.price*item.qty).toFixed(2)}</td></tr>`).join('');
   document.getElementById('receiptContent').innerHTML=`
-    <div class="receipt-header"><h2>💊 Rajeshwari Medical</h2><div class="store-sub">& General Store</div><div class="store-sub">${bill.shopAddress||SHOP_ADDRESS}</div><p style="margin-top:8px;font-weight:600">${bill.billId} &nbsp;|&nbsp; ${bill.date}</p></div>
+    <div class="receipt-header"><h2>💊 Rajeshwari Medical</h2><div class="store-sub">& General Store</div><div class="store-sub">${bill.shopAddress||SHOP_ADDRESS}</div>${bill.dlNumber?`<div class="store-sub">D.L. No: ${bill.dlNumber}</div>`:''}<p style="margin-top:8px;font-weight:600">${bill.billId} &nbsp;|&nbsp; ${bill.date}</p></div>
     <div style="font-size:13px;margin-bottom:16px">
       <div><strong>Patient:</strong> ${bill.patient}</div>
       <div><strong>Phone:</strong> ${bill.patientPhone||'—'}</div>
@@ -816,6 +856,7 @@ function downloadBillText(bill){
   let lines=[];
   lines.push('Rajeshwari Medical & General Store');
   lines.push(bill.shopAddress||SHOP_ADDRESS);
+  if(bill.dlNumber) lines.push('D.L. No: '+bill.dlNumber);
   lines.push('');
   lines.push('Bill No : '+bill.billId);
   lines.push('Date    : '+bill.date);
@@ -903,5 +944,6 @@ Object.assign(window, {
   onBillSearch, onBillSearchKey, selectBillMed, addToBill,
   changeQty, removeCartItem, clearCart, generateBill,
   showReceipt, closeReceipt, startNewBill,
-  doBrowserPrint, doBTPrint, renderHistory, downloadBillText, downloadAllBillsCSV, deleteAllBills
+  doBrowserPrint, doBTPrint, renderHistory, downloadBillText, downloadAllBillsCSV, deleteAllBills,
+  saveDlNumber
 });
